@@ -1,20 +1,18 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+// App.tsx
+import React from "react";
+import { LocaleProvider } from "./app/contexts/LocaleContext";
+import { SearchProvider } from "./app/contexts/SearchContext"; // 추가
+import MainNavigator from "./app/navigation/MainNavigator";
+import { NavigationContainer } from "@react-navigation/native";
 
 export default function App() {
   return (
-    <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <LocaleProvider>
+      <SearchProvider> {/* SearchProvider 추가 */}
+        <NavigationContainer>
+          <MainNavigator />
+        </NavigationContainer>
+      </SearchProvider>
+    </LocaleProvider>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
