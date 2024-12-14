@@ -1,5 +1,13 @@
+// app/navigation/types.ts
+
 export type RootStackParamList = {
-  Home: undefined; // Home에는 전달되는 params 없음
-  Recipe: { recipeId: string }; // Recipe 화면에 recipeId를 전달
-  Settings: undefined; // Settings 화면에는 전달되는 params 없음
+  Home: undefined;
+  Recipe: { recipeId: string };
+  RecipeList: undefined;
+  Favorites: undefined;
+  Ingredient: { ingredientId: string; locale: string };
+  Settings: undefined;
+  Splash: undefined;
+  Test: undefined; // Test 스크린 추가
+  // 다른 화면들 추가 가능
 };

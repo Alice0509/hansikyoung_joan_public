@@ -1,4 +1,4 @@
-//app/components/FilterBar.tsx
+// app/components/FilterBar.tsx
 
 import React from "react";
 import { View, Button, StyleSheet } from "react-native";
@@ -14,7 +14,7 @@ const FilterBar: React.FC = () => {
   const { filter, setFilter } = useSearch();
 
   const toggleCategory = (category: string) => {
-    setFilter((prev) => ({
+    setFilter((prev: { category?: string; maxTime?: number }) => ({
       ...prev,
       category: prev.category === category ? undefined : category,
     }));

@@ -1,18 +1,30 @@
-import React, { useEffect, useState } from "react";
-import { View, Text, Image, StyleSheet, ScrollView } from "react-native";
-import { useRoute, RouteProp } from "@react-navigation/native";
-import { getIngredientById } from "../lib/contentful";
-import { Ingredient } from "../types/Recipe";
+// app/screens/IngredientScreen.tsx
 
-type IngredientScreenRouteProp = RouteProp<
-  { params: { ingredientId: string; locale: string } },
-  "params"
+import React, { useEffect, useState } from "react";
+import { View, Text, StyleSheet, ActivityIndicator } from "react-native";
+import { RouteProp } from "@react-navigation/native";
+import { StackNavigationProp } from "@react-navigation/stack";
+import { getIngredientById } from "../lib/contentful";
+import { RootStackParamList } from "../navigation/types";
+
+type IngredientScreenRouteProp = RouteProp<RootStackParamList, "Ingredient">;
+type IngredientScreenNavigationProp = StackNavigationProp<
+  RootStackParamList,
+  "Ingredient"
 >;
 
-const IngredientScreen: React.FC = () => {
-  const route = useRoute<IngredientScreenRouteProp>();
+interface IngredientScreenProps {
+  route: IngredientScreenRouteProp;
+  navigation: IngredientScreenNavigationProp;
+}
+
+const IngredientScreen: React.FC<IngredientScreenProps> = ({
+  route,
+  navigation,
+}) => {
   const { ingredientId, locale } = route.params;
-  const [ingredient, setIngredient] = useState<Ingredient | null>(null);
+  const [ingredient, setIngredient] = useState<any>(null);
+  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const fetchIngredient = async () => {
@@ -21,74 +33,54 @@ const IngredientScreen: React.FC = () => {
         setIngredient(data);
       } catch (error) {
         console.error("Error fetching ingredient:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchIngredient();
   }, [ingredientId, locale]);
 
-  if (!ingredient) {
-    return <Text>Loading...</Text>;
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#0000ff" />
+      </View>
+    );
   }
 
-  const imageUrl =
-    ingredient.fields.bild?.fields?.file?.url ||
-    require("../../assets/images/default.png");
+  if (!ingredient) {
+    return (
+      <View style={styles.container}>
+        <Text>Ingredient not found.</Text>
+      </View>
+    );
+  }
 
   return (
-    <ScrollView style={styles.container}>
-      <Image source={{ uri: imageUrl }} style={styles.image} />
-      <Text style={styles.title}>{ingredient.fields.name}</Text>
-      <Text style={styles.description}>
-        {ingredient.fields.description?.content?.[0]?.content?.[0]?.value ||
-          "No description available."}
-      </Text>
-      {ingredient.fields.germanMeatCut && (
-        <View style={styles.infoContainer}>
-          <Text style={styles.infoTitle}>German Meat Cut</Text>
-          <Text style={styles.infoText}>{ingredient.fields.germanMeatCut}</Text>
-        </View>
-      )}
-    </ScrollView>
+    <View style={styles.container}>
+      <Text style={styles.title}>{ingredient.name}</Text>
+      <Text>{ingredient.description}</Text>
+      {/* 추가 정보 표시 */}
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
+    padding: 20,
     backgroundColor: "#fff",
   },
-  image: {
-    width: "100%",
-    height: 200,
-    borderRadius: 10,
-    marginBottom: 16,
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
   title: {
     fontSize: 24,
     fontWeight: "bold",
-    marginBottom: 8,
-  },
-  description: {
-    fontSize: 16,
-    color: "#666",
-    marginBottom: 16,
-  },
-  infoContainer: {
-    marginTop: 16,
-    padding: 16,
-    backgroundColor: "#f9f9f9",
-    borderRadius: 8,
-  },
-  infoTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 4,
-  },
-  infoText: {
-    fontSize: 16,
-    color: "#333",
+    marginBottom: 10,
   },
 });
 

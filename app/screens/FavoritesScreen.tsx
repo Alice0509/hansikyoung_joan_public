@@ -1,45 +1,34 @@
-//app/screens/FavoritesScreen.tsx
+// app/screens/FavoritesScreen.tsx
 
 import React from "react";
-import { View, FlatList, Text, StyleSheet } from "react-native";
-import { useFavorites } from "../contexts/FavoritesContext";
-import RecipeCard from "../components/RecipeCard";
-import { getRecipeById } from "../lib/contentful";
+import { Button, View, StyleSheet } from "react-native";
+import { StackNavigationProp } from "@react-navigation/stack";
+import { RootStackParamList } from "../navigation/types";
+import { useNavigation } from "@react-navigation/native";
 
-const FavoritesScreen = () => {
-  const { favorites } = useFavorites();
-  const [favoriteRecipes, setFavoriteRecipes] = React.useState([]);
+type FavoritesScreenNavigationProp = StackNavigationProp<
+  RootStackParamList,
+  "Favorites"
+>;
 
-  React.useEffect(() => {
-    const fetchFavorites = async () => {
-      const data = await Promise.all(
-        favorites.map((id) => getRecipeById(id, "en")),
-      );
-      setFavoriteRecipes(data);
-    };
-
-    fetchFavorites();
-  }, [favorites]);
-
-  if (favorites.length === 0) {
-    return <Text style={styles.emptyText}>No favorites yet!</Text>;
-  }
+const FavoritesScreen: React.FC = () => {
+  const navigation = useNavigation<FavoritesScreenNavigationProp>();
 
   return (
-    <FlatList
-      data={favoriteRecipes}
-      keyExtractor={(item) => item.id}
-      renderItem={({ item }) => <RecipeCard recipe={item} />}
-    />
+    <View style={styles.container}>
+      <Button
+        title="Go to Settings"
+        onPress={() => navigation.navigate("Settings")}
+      />
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  emptyText: {
-    fontSize: 16,
-    color: "#666",
-    textAlign: "center",
-    marginTop: 50,
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
 

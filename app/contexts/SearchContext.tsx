@@ -1,25 +1,25 @@
-//app/contexts/SearchContext.tsx
+// app/contexts/SearchContext.tsx
 
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState, ReactNode } from "react";
 
-type SearchContextType = {
+interface SearchContextProps {
   keyword: string;
   setKeyword: (keyword: string) => void;
-  filter: { category?: string; maxTime?: number };
-  setFilter: (filter: { category?: string; maxTime?: number }) => void;
-};
+  filter: {
+    category: string | null;
+  };
+  setFilter: (filter: { category: string | null }) => void;
+}
 
-type SearchProviderProps = {
-  children: React.ReactNode; // ReactNode를 사용하여 자식 요소 타입 정의
-};
+const SearchContext = createContext<SearchContextProps | undefined>(undefined);
 
-const SearchContext = createContext<SearchContextType | undefined>(undefined);
-
-export const SearchProvider: React.FC<SearchProviderProps> = ({ children }) => {
-  const [keyword, setKeyword] = useState("");
-  const [filter, setFilter] = useState<{ category?: string; maxTime?: number }>(
-    {},
-  );
+export const SearchProvider: React.FC<{ children: ReactNode }> = ({
+  children,
+}) => {
+  const [keyword, setKeyword] = useState<string>("");
+  const [filter, setFilter] = useState<{ category: string | null }>({
+    category: null,
+  });
 
   return (
     <SearchContext.Provider value={{ keyword, setKeyword, filter, setFilter }}>
@@ -28,7 +28,7 @@ export const SearchProvider: React.FC<SearchProviderProps> = ({ children }) => {
   );
 };
 
-export const useSearch = () => {
+export const useSearch = (): SearchContextProps => {
   const context = useContext(SearchContext);
   if (!context) {
     throw new Error("useSearch must be used within a SearchProvider");

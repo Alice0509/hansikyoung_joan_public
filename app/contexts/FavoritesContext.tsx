@@ -1,18 +1,20 @@
-//app/contexts/FavoritesContext.tsx
+// app/contexts/FavoritesContext.tsx
 
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState, ReactNode } from "react";
 
-type FavoritesContextType = {
-  favorites: string[]; // 저장된 즐겨찾기 ID 목록
+interface FavoritesContextProps {
+  favorites: string[];
   addFavorite: (id: string) => void;
   removeFavorite: (id: string) => void;
-};
+}
 
-const FavoritesContext = createContext<FavoritesContextType | undefined>(
+const FavoritesContext = createContext<FavoritesContextProps | undefined>(
   undefined,
 );
 
-export const FavoritesProvider: React.FC = ({ children }) => {
+export const FavoritesProvider: React.FC<{ children: ReactNode }> = ({
+  children,
+}) => {
   const [favorites, setFavorites] = useState<string[]>([]);
 
   const addFavorite = (id: string) => {
@@ -20,7 +22,7 @@ export const FavoritesProvider: React.FC = ({ children }) => {
   };
 
   const removeFavorite = (id: string) => {
-    setFavorites((prev) => prev.filter((fav) => fav !== id));
+    setFavorites((prev) => prev.filter((favId) => favId !== id));
   };
 
   return (
@@ -32,7 +34,7 @@ export const FavoritesProvider: React.FC = ({ children }) => {
   );
 };
 
-export const useFavorites = () => {
+export const useFavorites = (): FavoritesContextProps => {
   const context = useContext(FavoritesContext);
   if (!context) {
     throw new Error("useFavorites must be used within a FavoritesProvider");

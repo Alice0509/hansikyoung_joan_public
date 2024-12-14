@@ -75,7 +75,7 @@ export interface RecipeSkeleton extends EntrySkeletonType<RecipeFields> {
 }
 
 // Recipe Entry 타입 정의
-export type Recipe = Entry<RecipeSkeleton>;
+export type RecipeEntry = Entry<RecipeSkeleton>;
 
 /** Gallery 타입 정의 **/
 

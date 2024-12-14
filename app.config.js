@@ -26,7 +26,7 @@ export default ({ config }) => ({
         projectId: "84064207-a29f-4ddc-9942-fedd5bf9e6d8",
       },
     },
-    jsEngine: "jsc", 
+    jsEngine: "jsc",
     web: {
       favicon: "./assets/images/favicon.png",
     },
@@ -34,6 +34,20 @@ export default ({ config }) => ({
     ios: {
       bundleIdentifier: "com.joan.hansikyoungrecipes",
       deploymentTarget: "18.2", // iOS 배포 대상
+      infoPlist: {
+        NSAppTransportSecurity: {
+          NSExceptionDomains: {
+            "images.ctfassets.net": { // Contentful 이미지 도메인
+              NSIncludesSubdomains: true,
+              NSTemporaryExceptionAllowsInsecureHTTPLoads: true,
+            },
+            "img.youtube.com": { // YouTube 썸네일 도메인
+              NSIncludesSubdomains: true,
+              NSTemporaryExceptionAllowsInsecureHTTPLoads: true,
+            },
+          },
+        },
+      },
     },
     android: {
       package: "com.joan.hansikyoungrecipes",

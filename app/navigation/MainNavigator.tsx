@@ -1,96 +1,59 @@
 // app/navigation/MainNavigator.tsx
 
 import React from "react";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { TouchableOpacity, Text, StyleSheet } from "react-native";
+import { NavigationContainer } from "@react-navigation/native";
+import { createStackNavigator } from "@react-navigation/stack";
 
-// Screens
+// 스크린 컴포넌트 임포트
 import HomeScreen from "../screens/HomeScreen";
-import RecipeScreen from "../screens/RecipeScreen";
+import RecipeListScreen from "../screens/RecipeListScreen";
 import SettingsScreen from "../screens/SettingsScreen";
+import SplashScreen from "../screens/SplashScreen";
 import IngredientScreen from "../screens/IngredientScreen";
-import FavoritesScreen from "../screens/FavoritesScreen";
+import RecipeScreen from "../screens/RecipeScreen"; // RecipeScreen 임포트
 
-// Contexts
-import { useLocale } from "../contexts/LocaleContext";
+// 네비게이션 타입 정의 임포트
+import { RootStackParamList } from "./types";
 
-// Define the navigation parameters for each screen
-type MainStackParamList = {
-  Home: undefined;
-  Recipe: undefined;
-  Ingredient: undefined;
-  Settings: undefined;
-  Favorites: undefined;
-};
+const Stack = createStackNavigator<RootStackParamList>();
 
-// Create the Stack Navigator
-const Stack = createNativeStackNavigator<MainStackParamList>();
-
-const MainNavigator = () => {
-  const { locale } = useLocale(); // Locale 상태를 사용
-
+const MainNavigator: React.FC = () => {
   return (
-    <Stack.Navigator>
-      {/* Home Screen */}
-      <Stack.Screen
-        name="Home"
-        component={HomeScreen}
-        options={({ navigation }) => ({
-          title: locale === "de" ? "Rezeptliste" : "Recipe List",
-          headerRight: () => (
-            <TouchableOpacity
-              style={styles.headerButton}
-              onPress={() => navigation.navigate("Settings")}
-            >
-              <Text style={styles.headerButtonText}>Settings</Text>
-            </TouchableOpacity>
-          ),
-        })}
-      />
-      {/* Recipe Details */}
-      <Stack.Screen
-        name="Recipe"
-        component={RecipeScreen}
-        options={{
-          title: locale === "de" ? "Rezeptdetails" : "Recipe Details",
-        }}
-      />
-      {/* Ingredient Details */}
-      <Stack.Screen
-        name="Ingredient"
-        component={IngredientScreen}
-        options={{
-          title: locale === "de" ? "Zutaten Details" : "Ingredient Details",
-        }}
-      />
-      {/* Settings Screen */}
-      <Stack.Screen
-        name="Settings"
-        component={SettingsScreen}
-        options={{
-          title: locale === "de" ? "Einstellungen" : "Settings",
-        }}
-      />
-      {/* Favorites Screen */}
-      <Stack.Screen
-        name="Favorites"
-        component={FavoritesScreen}
-        options={{
-          title: locale === "de" ? "Favoriten" : "Favorites",
-        }}
-      />
-    </Stack.Navigator>
+    <NavigationContainer>
+      <Stack.Navigator initialRouteName="Splash">
+        <Stack.Screen
+          name="Splash"
+          component={SplashScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="Home"
+          component={HomeScreen}
+          options={{ title: "Home" }}
+        />
+        <Stack.Screen
+          name="RecipeList"
+          component={RecipeListScreen}
+          options={{ title: "Recipe List" }}
+        />
+        <Stack.Screen
+          name="Settings"
+          component={SettingsScreen}
+          options={{ title: "Settings" }}
+        />
+        <Stack.Screen
+          name="Ingredient"
+          component={IngredientScreen}
+          options={{ title: "Ingredient Details" }}
+        />
+        <Stack.Screen
+          name="Recipe"
+          component={RecipeScreen} // 'Recipe' 스크린 등록
+          options={{ title: "Recipe Details" }}
+        />
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 };
-
-const styles = StyleSheet.create({
-  headerButton: {
-    marginRight: 10,
-  },
-  headerButtonText: {
-    color: "#007BFF",
-    fontSize: 16,
-  },
-});
 
 export default MainNavigator;
