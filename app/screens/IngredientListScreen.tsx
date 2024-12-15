@@ -1,128 +1,92 @@
 // app/screens/IngredientListScreen.tsx
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
-  Text,
   FlatList,
-  TouchableOpacity,
   StyleSheet,
+  ActivityIndicator,
+  Text,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../navigation/types";
 import { Entry } from "contentful";
 import { Ingredient } from "../types/Recipe";
+import IngredientCard from "../components/IngredientCard"; // IngredientCard 임포트
+import { getAllIngredients } from "../lib/contentful"; // getAllIngredients 임포트
 
 type IngredientListScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
-  "Main"
+  "Ingredients"
 >;
-
-const mockIngredients: Entry<Ingredient>[] = [
-  // 실제 데이터 또는 mock 데이터 추가
-  {
-    sys: {
-      id: "28LenbD52G2ppPaFPToO0h",
-      type: "Entry",
-      createdAt: "2024-11-18T18:45:30.555Z",
-      updatedAt: "2024-11-19T21:18:33.157Z",
-      environment: {
-        sys: { id: "master", type: "Link", linkType: "Environment" },
-      },
-      publishedVersion: 11,
-      revision: 3,
-      space: {
-        sys: { type: "Link", linkType: "Space", id: "9o76sn8xew7r" },
-      },
-      contentType: {
-        sys: { type: "Link", linkType: "ContentType", id: "ingredient" },
-      },
-      locale: "en",
-    },
-    fields: {
-      name: "Spam",
-      slug: "spam",
-      bild: {
-        sys: {
-          space: {
-            sys: { type: "Link", linkType: "Space", id: "9o76sn8xew7r" },
-          },
-          id: "55NxMMpuSA7DJLGCCwWS5f",
-          type: "Asset",
-          createdAt: "2024-11-19T21:13:27.125Z",
-          updatedAt: "2024-11-19T21:13:27.125Z",
-          environment: {
-            sys: { id: "master", type: "Link", linkType: "Environment" },
-          },
-          publishedVersion: 6,
-          revision: 1,
-          locale: "en",
-        },
-        fields: {
-          title: "Tulip Frühstücksfleisch",
-          description: "",
-          file: {
-            url: "//images.ctfassets.net/9o76sn8xew7r/55NxMMpuSA7DJLGCCwWS5f/b611b89018e46eb27d0704448f522e75/Tulip_Fru_hstu_cksfleisch.jpg",
-            details: {
-              size: 66498,
-              image: {
-                width: 782,
-                height: 854,
-              },
-            },
-            fileName: "Tulip Frühstücksfleisch.jpg",
-            contentType: "image/jpeg",
-          },
-        },
-      },
-      description: {
-        data: {},
-        content: [
-          {
-            data: {},
-            content: [
-              {
-                data: {},
-                marks: [],
-                value:
-                  'In Korea, spam is mainly produced by CJ in partnership with the American company Hormel and is sold under the name "Spam." In Germany, I use "Tulip Frühstücksfleisch," which I find similar to spam, though slightly less salty in my opinion. It works well for all Korean spam recipes.',
-                nodeType: "text",
-              },
-            ],
-            nodeType: "paragraph",
-          },
-        ],
-        nodeType: "document",
-      },
-    },
-  },
-  // 추가적인 mock 데이터
-];
 
 const IngredientListScreen: React.FC = () => {
   const navigation = useNavigation<IngredientListScreenNavigationProp>();
+  const [ingredients, setIngredients] = useState<Entry<Ingredient>[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchIngredients = async () => {
+      try {
+        const data = await getAllIngredients("en"); // 필요한 locale로 설정
+        // bild 필드가 있는 항목만 필터링
+        const filteredData = data.filter(
+          (ingredient) =>
+            ingredient.fields.bild && ingredient.fields.bild.fields.file.url,
+        );
+        setIngredients(filteredData);
+        console.log("Fetched Ingredients:", filteredData);
+      } catch (error) {
+        console.error("Error fetching ingredients:", error);
+        setError("Failed to load ingredients.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchIngredients();
+  }, []);
 
   const renderItem = ({ item }: { item: Entry<Ingredient> }) => (
-    <TouchableOpacity
-      style={styles.item}
-      onPress={() =>
-        navigation.navigate("Ingredient", {
-          ingredientId: item.sys.id,
-          locale: "en",
-        })
-      }
-    >
-      <Text style={styles.title}>{item.fields.name}</Text>
-    </TouchableOpacity>
+    <IngredientCard ingredient={item} />
   );
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#007AFF" />
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.centeredContainer}>
+        <Text style={styles.errorText}>{error}</Text>
+      </View>
+    );
+  }
+
+  if (ingredients.length === 0) {
+    return (
+      <View style={styles.centeredContainer}>
+        <Text style={styles.noDataText}>No ingredients available.</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
       <FlatList
-        data={mockIngredients}
+        data={ingredients}
         keyExtractor={(item) => item.sys.id}
         renderItem={renderItem}
+        contentContainerStyle={styles.listContainer}
+        showsVerticalScrollIndicator={false}
+        initialNumToRender={10}
+        windowSize={5}
       />
     </View>
   );
@@ -134,13 +98,29 @@ const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: "#fff",
   },
-  item: {
-    padding: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: "#ccc",
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
-  title: {
-    fontSize: 18,
+  centeredContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 20,
+  },
+  listContainer: {
+    paddingBottom: 20,
+  },
+  errorText: {
+    textAlign: "center",
+    fontSize: 16,
+    color: "red",
+  },
+  noDataText: {
+    textAlign: "center",
+    fontSize: 16,
+    color: "#000",
   },
 });
 

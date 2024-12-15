@@ -7,6 +7,7 @@ import SplashScreen from "../screens/SplashScreen";
 import MainTabNavigator from "./MainTabNavigator";
 import IngredientScreen from "../screens/IngredientScreen";
 import RecipeDetailScreen from "../screens/RecipeDetailScreen";
+import FavoritesScreen from "../screens/FavoritesScreen";
 
 import { RootStackParamList } from "./types";
 
@@ -37,6 +38,11 @@ const MainNavigator: React.FC = () => {
         name="RecipeDetail"
         component={RecipeDetailScreen}
         options={{ title: "Recipe Details" }}
+      />
+      <Stack.Screen
+        name="Favorites"
+        component={FavoritesScreen}
+        options={{ title: "Favorites" }}
       />
     </Stack.Navigator>
   );

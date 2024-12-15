@@ -7,7 +7,6 @@ import { Ingredient } from "../types/Recipe"; // Ingredient 타입 임포트
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../navigation/types";
-import RichTextRenderer from "./RichTextRenderer";
 
 type IngredientCardNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -20,16 +19,14 @@ interface IngredientCardProps {
 
 const IngredientCard: React.FC<IngredientCardProps> = ({ ingredient }) => {
   const navigation = useNavigation<IngredientCardNavigationProp>();
-  const { name, germanMeatCut, bild, description } = ingredient.fields;
+  const { name, bild } = ingredient.fields;
 
   // 이미지가 없는 경우 카드 표시하지 않음
-  if (!bild) {
+  if (!bild || !bild.fields.file.url) {
     return null;
   }
 
-  const imageUrl = bild.fields.file.url
-    ? `https:${bild.fields.file.url}`
-    : null;
+  const imageUrl = `https:${bild.fields.file.url}`;
 
   return (
     <TouchableOpacity
@@ -40,16 +37,18 @@ const IngredientCard: React.FC<IngredientCardProps> = ({ ingredient }) => {
           locale: "en", // 필요한 locale을 전달
         })
       }
+      accessible={true}
+      accessibilityLabel={`Ingredient: ${name}`}
     >
-      {imageUrl && <Image source={{ uri: imageUrl }} style={styles.image} />}
+      {/* 이미지 렌더링 */}
+      <Image
+        source={{ uri: imageUrl }}
+        style={styles.image}
+        resizeMode="cover"
+      />
+      {/* 이름 표시 */}
       <View style={styles.infoContainer}>
         <Text style={styles.name}>{name}</Text>
-        {germanMeatCut && (
-          <Text style={styles.germanMeatCut}>
-            독일식 고기 부위: {germanMeatCut}
-          </Text>
-        )}
-        {description && <RichTextRenderer content={description} />}
       </View>
     </TouchableOpacity>
   );
@@ -78,12 +77,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "bold",
     color: "#000",
-    marginBottom: 5,
-  },
-  germanMeatCut: {
-    fontSize: 14,
-    color: "#555",
-    marginBottom: 5,
+    textAlign: "center",
   },
 });
 

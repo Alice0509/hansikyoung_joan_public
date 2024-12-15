@@ -10,11 +10,13 @@ import {
   Platform,
 } from "react-native";
 import { useFavorites } from "../contexts/FavoritesContext";
-import { RecipeEntry } from "../types/Recipe";
+import { Entry } from "contentful";
+import { Recipe } from "../types/Recipe";
 import { getThumbnailFromEmbedUrl } from "../lib/getYouTubeThumbnail";
+import { Ionicons } from "@expo/vector-icons"; // Expo 벡터 아이콘 사용
 
 interface RecipeCardProps {
-  recipe: RecipeEntry;
+  recipe: Entry<Recipe>;
   onPress: () => void;
   fullWidth?: boolean; // 전체 너비를 사용할지 여부
   showCategory?: boolean; // 카테고리 정보를 표시할지 여부
@@ -26,18 +28,19 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
   fullWidth = false,
   showCategory = false,
 }) => {
-  const { favorites, addFavorite, removeFavorite } = useFavorites();
-  const isFavorite = favorites.includes(recipe.sys.id);
+  const { addFavorite, removeFavorite, isFavorite } = useFavorites();
+  const recipeId = recipe.sys.id;
+  const favorite = isFavorite(recipeId);
 
   // 유튜브 썸네일 추출
-  const youTubeThumbnail = recipe.fields.youTubeUrl
+  const youTubeThumbnail = recipe.fields?.youTubeUrl
     ? getThumbnailFromEmbedUrl(recipe.fields.youTubeUrl)
     : null;
 
   // 이미지 우선순위 처리: 레시피 이미지 > 유튜브 썸네일 > 기본 이미지
   let imageUrl: string | null = null;
   if (
-    recipe.fields.image &&
+    recipe.fields?.image &&
     recipe.fields.image.length > 0 &&
     recipe.fields.image[0].fields.file.url
   ) {
@@ -47,12 +50,12 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
   }
 
   const handleFavoriteToggle = () => {
-    isFavorite ? removeFavorite(recipe.sys.id) : addFavorite(recipe.sys.id);
+    favorite ? removeFavorite(recipeId) : addFavorite(recipeId);
   };
 
   // 카테고리 이름 가져오기 (모든 카테고리 표시)
   const categoryNames =
-    recipe.fields.categories && recipe.fields.categories.length > 0
+    recipe.fields?.categories && recipe.fields.categories.length > 0
       ? recipe.fields.categories.map((cat) => cat.fields.name).join(", ")
       : "No Category";
 
@@ -64,7 +67,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
       ]}
       onPress={onPress}
       accessible={true}
-      accessibilityLabel={`Recipe: ${recipe.fields.titel}`}
+      accessibilityLabel={`Recipe: ${recipe.fields?.titel || "Untitled Recipe"}`}
     >
       {/* 이미지 렌더링 */}
       {imageUrl ? (
@@ -83,7 +86,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
       {/* 제목 및 카테고리 */}
       <View style={styles.content}>
         <Text style={styles.title}>
-          {recipe.fields.titel || "Untitled Recipe"}
+          {recipe.fields?.titel || "Untitled Recipe"}
         </Text>
         {showCategory && <Text style={styles.category}>{categoryNames}</Text>}
       </View>
@@ -91,8 +94,16 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
       <TouchableOpacity
         style={styles.favoriteButton}
         onPress={handleFavoriteToggle}
+        accessible={true}
+        accessibilityLabel={
+          favorite ? "Remove from favorites" : "Add to favorites"
+        }
       >
-        <Text style={styles.favoriteText}>{isFavorite ? "★" : "☆"}</Text>
+        <Ionicons
+          name={favorite ? "heart" : "heart-outline"}
+          size={24}
+          color={favorite ? "red" : "gray"}
+        />
       </TouchableOpacity>
     </TouchableOpacity>
   );
@@ -155,10 +166,6 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0,0,0,0.5)",
     borderRadius: 20,
     padding: 5,
-  },
-  favoriteText: {
-    fontSize: 18,
-    color: "#fff",
   },
 });
 

@@ -16,9 +16,11 @@ const App: React.FC = () => {
         <SearchProvider>
           <FavoritesProvider>
             <SafeAreaView style={styles.container}>
-              <NavigationContainer>
-                <MainNavigator />
-              </NavigationContainer>
+              <FavoritesProvider>
+                <NavigationContainer>
+                  <MainNavigator />
+                </NavigationContainer>
+              </FavoritesProvider>
             </SafeAreaView>
           </FavoritesProvider>
         </SearchProvider>

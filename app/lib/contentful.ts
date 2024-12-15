@@ -105,3 +105,22 @@ export const getIngredientById = async (
     throw new Error("Failed to fetch ingredient.");
   }
 };
+
+/**
+ * 모든 Ingredients를 로케일과 함께 가져옵니다.
+ */
+export const getAllIngredients = async (
+  locale: string = "en",
+): Promise<Entry<Ingredient>[]> => {
+  try {
+    const entries = await client.getEntries<Ingredient>({
+      content_type: "ingredient",
+      locale,
+      include: 3, // 연결된 엔트리 포함 수준 (필요 시 조정)
+    });
+    return entries.items;
+  } catch (error) {
+    console.error("Error fetching ingredients:", error);
+    throw new Error("Failed to fetch ingredients.");
+  }
+};

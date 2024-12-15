@@ -35,6 +35,7 @@ const IngredientScreen: React.FC<IngredientScreenProps> = ({
   const { ingredientId, locale } = route.params;
   const [ingredient, setIngredient] = useState<Entry<Ingredient> | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchIngredient = async () => {
@@ -50,6 +51,7 @@ const IngredientScreen: React.FC<IngredientScreenProps> = ({
         console.log("Fetched Ingredient:", JSON.stringify(data, null, 2)); // 응답 데이터 로그
       } catch (error) {
         console.error("Error fetching ingredient:", error);
+        setError("Failed to load ingredient.");
       } finally {
         setLoading(false);
       }
@@ -61,25 +63,33 @@ const IngredientScreen: React.FC<IngredientScreenProps> = ({
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#0000ff" />
+        <ActivityIndicator size="large" color="#007AFF" />
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.centeredContainer}>
+        <Text style={styles.errorText}>{error}</Text>
       </View>
     );
   }
 
   if (!ingredient) {
     return (
-      <View style={styles.container}>
+      <View style={styles.centeredContainer}>
         <Text style={styles.notFoundText}>Ingredient not found.</Text>
       </View>
     );
   }
 
-  const { name, germanMeatCut, bild, description } = ingredient.fields;
+  const { name, slug, germanMeatCut, bild, description } = ingredient.fields;
 
   // 이미지가 없는 경우 페이지를 표시하지 않음
-  if (!bild) {
+  if (!bild || !bild.fields.file.url) {
     return (
-      <View style={styles.container}>
+      <View style={styles.centeredContainer}>
         <Text style={styles.notFoundText}>
           이미지가 없는 재료는 표시되지 않습니다.
         </Text>
@@ -87,14 +97,13 @@ const IngredientScreen: React.FC<IngredientScreenProps> = ({
     );
   }
 
-  const imageUrl = bild.fields.file.url
-    ? `https:${bild.fields.file.url}`
-    : null;
+  const imageUrl = `https:${bild.fields.file.url}`;
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      {imageUrl && <Image source={{ uri: imageUrl }} style={styles.image} />}
+      <Image source={{ uri: imageUrl }} style={styles.image} />
       <Text style={styles.name}>{name}</Text>
+      {slug && <Text style={styles.slug}>Slug: {slug}</Text>}
       {germanMeatCut && (
         <Text style={styles.germanMeatCut}>
           독일식 고기 부위: {germanMeatCut}
@@ -114,13 +123,24 @@ const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: "#fff",
     flexGrow: 1,
-    justifyContent: "center",
+    justifyContent: "flex-start",
     alignItems: "center",
   },
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+  },
+  centeredContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 20,
+  },
+  errorText: {
+    textAlign: "center",
+    fontSize: 16,
+    color: "red",
   },
   notFoundText: {
     fontSize: 18,
@@ -140,6 +160,12 @@ const styles = StyleSheet.create({
     color: "#000",
     textAlign: "center",
   },
+  slug: {
+    fontSize: 16,
+    marginBottom: 10,
+    color: "#333",
+    textAlign: "center",
+  },
   germanMeatCut: {
     fontSize: 16,
     marginBottom: 10,
@@ -149,7 +175,8 @@ const styles = StyleSheet.create({
   text: {
     fontSize: 16,
     color: "#333",
-    textAlign: "center",
+    textAlign: "left",
+    width: "100%",
   },
 });
 
