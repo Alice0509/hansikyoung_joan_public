@@ -16,9 +16,16 @@ import { getThumbnailFromEmbedUrl } from "../lib/getYouTubeThumbnail";
 interface RecipeCardProps {
   recipe: RecipeEntry;
   onPress: () => void;
+  fullWidth?: boolean; // 전체 너비를 사용할지 여부
+  showCategory?: boolean; // 카테고리 정보를 표시할지 여부
 }
 
-const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, onPress }) => {
+const RecipeCard: React.FC<RecipeCardProps> = ({
+  recipe,
+  onPress,
+  fullWidth = false,
+  showCategory = false,
+}) => {
   const { favorites, addFavorite, removeFavorite } = useFavorites();
   const isFavorite = favorites.includes(recipe.sys.id);
 
@@ -43,8 +50,22 @@ const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, onPress }) => {
     isFavorite ? removeFavorite(recipe.sys.id) : addFavorite(recipe.sys.id);
   };
 
+  // 카테고리 이름 가져오기 (모든 카테고리 표시)
+  const categoryNames =
+    recipe.fields.categories && recipe.fields.categories.length > 0
+      ? recipe.fields.categories.map((cat) => cat.fields.name).join(", ")
+      : "No Category";
+
   return (
-    <TouchableOpacity style={styles.card} onPress={onPress}>
+    <TouchableOpacity
+      style={[
+        styles.card,
+        fullWidth ? styles.fullWidthCard : styles.defaultCard,
+      ]}
+      onPress={onPress}
+      accessible={true}
+      accessibilityLabel={`Recipe: ${recipe.fields.titel}`}
+    >
       {/* 이미지 렌더링 */}
       {imageUrl ? (
         <Image
@@ -59,17 +80,13 @@ const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, onPress }) => {
           resizeMode="cover"
         />
       )}
-
       {/* 제목 및 카테고리 */}
       <View style={styles.content}>
         <Text style={styles.title}>
           {recipe.fields.titel || "Untitled Recipe"}
         </Text>
-        <Text style={styles.category}>
-          {recipe.fields.category || "No Category"}
-        </Text>
+        {showCategory && <Text style={styles.category}>{categoryNames}</Text>}
       </View>
-
       {/* 즐겨찾기 버튼 */}
       <TouchableOpacity
         style={styles.favoriteButton}
@@ -83,8 +100,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({ recipe, onPress }) => {
 
 const styles = StyleSheet.create({
   card: {
-    marginBottom: 16,
-    backgroundColor: "#fff", // 배경색 추가
+    backgroundColor: "#fff",
     borderRadius: 8,
     overflow: "hidden",
     // 그림자 스타일 플랫폼별로 적용
@@ -103,10 +119,19 @@ const styles = StyleSheet.create({
       },
     }),
     position: "relative",
+    marginBottom: 20, // 카드 간 간격 확보
+  },
+  defaultCard: {
+    width: 250, // 홈 스크린에서 사용할 고정 너비
+    marginRight: 15, // 홈 스크린에서 사용할 오른쪽 마진
+  },
+  fullWidthCard: {
+    width: "100%", // 레시피 리스트에서 전체 너비 사용
+    marginRight: 0, // 레시피 리스트에서는 오른쪽 마진 제거
   },
   image: {
     width: "100%",
-    height: 150,
+    height: 200, // 고정 높이 또는 비율에 따라 조정
   },
   content: {
     padding: 10,
@@ -114,13 +139,14 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 18,
     fontWeight: "bold",
-    marginBottom: 5,
-    color: "#000", // 텍스트 색상 명시
+    textAlign: "center",
+    color: "#000",
   },
   category: {
     fontSize: 14,
     color: "#666",
-    marginBottom: 10,
+    textAlign: "center",
+    marginTop: 5,
   },
   favoriteButton: {
     position: "absolute",

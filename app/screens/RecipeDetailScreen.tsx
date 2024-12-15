@@ -1,4 +1,4 @@
-// app/screens/RecipeScreen.tsx
+// app/screens/RecipeDetailScreen.tsx
 
 import React, { useState, useEffect } from "react";
 import {
@@ -16,14 +16,14 @@ import { RouteProp } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { getRecipeById } from "../lib/contentful";
 import RichTextRenderer from "../components/RichTextRenderer";
-import { RecipeEntry } from "../types/Recipe";
+import { RecipeEntry, RecipeIngredient, Ingredient } from "../types/Recipe";
 import { RootStackParamList } from "../navigation/types";
 import { getThumbnailFromEmbedUrl } from "../lib/getYouTubeThumbnail";
 
-type RecipeScreenRouteProp = RouteProp<RootStackParamList, "Recipe">;
+type RecipeScreenRouteProp = RouteProp<RootStackParamList, "RecipeDetail">;
 type RecipeScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
-  "Recipe"
+  "RecipeDetail"
 >;
 
 interface RecipeScreenProps {
@@ -36,8 +36,6 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route, navigation }) => {
   const [recipe, setRecipe] = useState<RecipeEntry | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [thumbnail, setThumbnail] = useState<string | null>(null);
-
-  const { width } = Dimensions.get("window");
 
   useEffect(() => {
     const fetchRecipe = async () => {
@@ -70,7 +68,7 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route, navigation }) => {
   if (!recipe) {
     return (
       <View style={styles.container}>
-        <Text>Recipe not found.</Text>
+        <Text style={styles.notFoundText}>Recipe not found.</Text>
       </View>
     );
   }
@@ -92,6 +90,48 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route, navigation }) => {
   const imageUrl = image?.[0]?.fields?.file?.url
     ? `https:${image[0].fields.file.url}`
     : null;
+
+  // 모든 재료 표시 (이미지가 있는 재료에만 링크 걸기)
+  const renderIngredients = () => {
+    if (!ingredients || ingredients.length === 0) {
+      return <Text style={styles.text}>No ingredients available.</Text>;
+    }
+
+    return ingredients.map(
+      (recipeIngredient: RecipeIngredient, index: number) => {
+        const ingredient = recipeIngredient.fields.ingredient as Ingredient;
+        const { name, bild } = ingredient.fields;
+        const quantity = recipeIngredient.fields.quantity || "";
+
+        // 이미지 존재 여부 확인
+        const hasImage = !!bild;
+        const ingredientId = ingredient.sys.id;
+
+        return (
+          <View key={recipeIngredient.sys.id} style={styles.ingredientItem}>
+            {/* 재료 이름 표시 (링크 걸기) */}
+            {hasImage ? (
+              <TouchableOpacity
+                onPress={() =>
+                  navigation.navigate("Ingredient", {
+                    ingredientId: ingredientId,
+                    locale: "en",
+                  })
+                }
+              >
+                <Text style={styles.ingredientLink}>{name}</Text>
+              </TouchableOpacity>
+            ) : (
+              <Text style={styles.ingredientText}>{name}</Text>
+            )}
+
+            {/* Quantity 표시 */}
+            <Text style={styles.ingredientQuantity}>{quantity}</Text>
+          </View>
+        );
+      },
+    );
+  };
 
   return (
     <ScrollView
@@ -127,51 +167,14 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route, navigation }) => {
 
       {/* 재료 */}
       <Text style={styles.sectionHeader}>재료:</Text>
-      <View style={styles.ingredientsContainer}>
-        {ingredients && ingredients.length > 0 ? (
-          ingredients.map((recipeIngredient, index) => {
-            const ingredientName =
-              recipeIngredient.fields.ingredient?.fields?.name ||
-              "Unnamed Ingredient";
-            const quantity = recipeIngredient.fields.quantity || "";
-            const ingredientId = recipeIngredient.fields.ingredient?.sys.id;
-            const localeToUse = "en";
-
-            if (!ingredientId) {
-              return (
-                <Text key={index} style={styles.text}>
-                  - {ingredientName} {quantity ? `(${quantity})` : ""}
-                </Text>
-              );
-            }
-
-            return (
-              <TouchableOpacity
-                key={index}
-                onPress={() =>
-                  navigation.navigate("Ingredient", {
-                    ingredientId,
-                    locale: localeToUse,
-                  })
-                }
-              >
-                <Text style={styles.text}>
-                  - {ingredientName} {quantity ? `(${quantity})` : ""}
-                </Text>
-              </TouchableOpacity>
-            );
-          })
-        ) : (
-          <Text style={styles.text}>No Ingredients Available</Text>
-        )}
-      </View>
+      <View style={styles.ingredientsContainer}>{renderIngredients()}</View>
 
       {/* 설명 */}
       <Text style={styles.sectionHeader}>설명:</Text>
       {description ? (
         <RichTextRenderer content={description} />
       ) : (
-        <Text>No Description Available</Text>
+        <Text style={styles.text}>No Description Available</Text>
       )}
 
       {/* 조리 방법 */}
@@ -179,7 +182,7 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route, navigation }) => {
       {instructions ? (
         <RichTextRenderer content={instructions} />
       ) : (
-        <Text>No Instructions Available</Text>
+        <Text style={styles.text}>No Instructions Available</Text>
       )}
 
       {/* YouTube 썸네일 */}
@@ -231,12 +234,17 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingBottom: 20,
-    minHeight: Dimensions.get("window").height,
+    flexGrow: 1,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+  },
+  notFoundText: {
+    fontSize: 18,
+    color: "#ff0000",
+    textAlign: "center",
   },
   image: {
     width: "100%",
@@ -261,7 +269,26 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
   ingredientsContainer: {
-    marginTop: 5,
+    marginTop: 10,
+  },
+  ingredientItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  ingredientQuantity: {
+    fontSize: 16,
+    color: "#555",
+    marginLeft: 10, // 재료 이름과 양 사이 간격 조정
+  },
+  ingredientLink: {
+    fontSize: 16,
+    color: "blue",
+    textDecorationLine: "underline",
+  },
+  ingredientText: {
+    fontSize: 16,
+    color: "#333",
   },
   youtubeContainer: {
     marginTop: 20,

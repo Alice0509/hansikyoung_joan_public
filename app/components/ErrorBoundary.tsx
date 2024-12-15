@@ -9,20 +9,21 @@ interface Props {
 
 interface State {
   hasError: boolean;
+  error: Error | null;
 }
 
 class ErrorBoundary extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
-    this.state = { hasError: false };
+    this.state = { hasError: false, error: null };
   }
 
-  static getDerivedStateFromError(_: Error): State {
-    return { hasError: true };
+  static getDerivedStateFromError(error: Error): State {
+    return { hasError: true, error };
   }
 
   componentDidCatch(error: Error, errorInfo: any) {
-    console.error("Uncaught error:", error, errorInfo);
+    console.error("ErrorBoundary caught an error", error, errorInfo);
   }
 
   render() {
@@ -30,6 +31,7 @@ class ErrorBoundary extends Component<Props, State> {
       return (
         <View style={styles.container}>
           <Text style={styles.errorText}>Something went wrong.</Text>
+          <Text style={styles.errorDetails}>{this.state.error?.message}</Text>
         </View>
       );
     }
@@ -43,10 +45,19 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    padding: 20,
+    backgroundColor: "#fff",
   },
   errorText: {
     fontSize: 18,
+    fontWeight: "bold",
     color: "red",
+    marginBottom: 10,
+  },
+  errorDetails: {
+    fontSize: 14,
+    color: "#333",
+    textAlign: "center",
   },
 });
 

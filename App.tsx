@@ -7,6 +7,7 @@ import { FavoritesProvider } from "./app/contexts/FavoritesContext";
 import { SearchProvider } from "./app/contexts/SearchContext";
 import { LocaleProvider } from "./app/contexts/LocaleContext";
 import ErrorBoundary from "./app/components/ErrorBoundary";
+import { NavigationContainer } from "@react-navigation/native"; // 추가
 
 const App: React.FC = () => {
   return (
@@ -15,7 +16,9 @@ const App: React.FC = () => {
         <SearchProvider>
           <FavoritesProvider>
             <SafeAreaView style={styles.container}>
-              <MainNavigator />
+              <NavigationContainer>
+                <MainNavigator />
+              </NavigationContainer>
             </SafeAreaView>
           </FavoritesProvider>
         </SearchProvider>

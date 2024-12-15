@@ -37,11 +37,13 @@ export default ({ config }) => ({
       infoPlist: {
         NSAppTransportSecurity: {
           NSExceptionDomains: {
-            "images.ctfassets.net": { // Contentful 이미지 도메인
+            "images.ctfassets.net": {
+              // Contentful 이미지 도메인
               NSIncludesSubdomains: true,
               NSTemporaryExceptionAllowsInsecureHTTPLoads: true,
             },
-            "img.youtube.com": { // YouTube 썸네일 도메인
+            "img.youtube.com": {
+              // YouTube 썸네일 도메인
               NSIncludesSubdomains: true,
               NSTemporaryExceptionAllowsInsecureHTTPLoads: true,
             },

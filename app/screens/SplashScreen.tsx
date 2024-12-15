@@ -2,23 +2,21 @@
 
 import React, { useEffect } from "react";
 import { View, Image, StyleSheet } from "react-native";
-import splashImage from "../../assets/images/splash.png"; // 실제 splash 이미지 경로
 import { StackNavigationProp } from "@react-navigation/stack";
 import { RootStackParamList } from "../navigation/types";
+import { useNavigation } from "@react-navigation/native";
 
 type SplashScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
   "Splash"
 >;
 
-interface SplashScreenProps {
-  navigation: SplashScreenNavigationProp;
-}
+const SplashScreen: React.FC = () => {
+  const navigation = useNavigation<SplashScreenNavigationProp>();
 
-const SplashScreen: React.FC<SplashScreenProps> = ({ navigation }) => {
   useEffect(() => {
     const timer = setTimeout(() => {
-      navigation.replace("Home"); // Splash 후 Home으로 이동
+      navigation.replace("Main"); // Splash 후 Main으로 이동
     }, 2000); // 2초 후 이동
 
     return () => clearTimeout(timer);
@@ -26,7 +24,11 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <Image source={splashImage} style={styles.image} resizeMode="contain" />
+      <Image
+        source={require("../../assets/images/splash.png")} // 스플래쉬 이미지 경로
+        style={styles.image}
+        resizeMode="contain" // 필요에 따라 'cover' 또는 'stretch'로 변경 가능
+      />
     </View>
   );
 };
@@ -36,11 +38,11 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#fff", // 스플래시 화면 배경색
+    backgroundColor: "#fff", // 스플래쉬 배경색
   },
   image: {
-    width: 200,
-    height: 200,
+    width: 200, // 필요에 따라 조정
+    height: 200, // 필요에 따라 조정
   },
 });
 

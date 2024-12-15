@@ -1,6 +1,6 @@
 // app/types/Recipe.ts
 
-import { Entry, EntrySkeletonType, Asset } from "contentful";
+import { Entry, EntrySkeletonType } from "contentful";
 import { Document } from "@contentful/rich-text-types"; // Contentful Rich Text 타입
 
 /** 공통 타입 정의 **/
@@ -15,22 +15,20 @@ export interface Location {
 
 // Ingredient Content Type의 필드 정의
 export interface IngredientFields {
-  name: string; // 이름 (Short text, 필수)
-  slug: string; // 슬러그 (Short text, 필수)
-  germanMeatCut?: string; // 독일식 고기 부위 (Short text, 선택)
-  bild?: Asset; // 이미지 (Media - Image, 선택)
-  description?: Document; // 설명 (Rich Text, 선택)
+  name: string;
+  germanMeatCut?: string;
+  bild?: {
+    fields: {
+      file: {
+        url: string;
+      };
+    };
+  };
+  description?: Document; // Rich Text 등 상세한 타입 정의 필요
+  slug?: string;
 }
 
-// Ingredient Content Type의 스켈레톤 정의
-export interface IngredientSkeleton
-  extends EntrySkeletonType<IngredientFields> {
-  fields: IngredientFields;
-  contentTypeId: "ingredient";
-}
-
-// Ingredient Entry 타입 정의
-export type Ingredient = Entry<IngredientSkeleton>;
+export interface Ingredient extends Entry<IngredientFields> {}
 
 /** RecipeIngredient 타입 정의 **/
 
@@ -51,6 +49,30 @@ export interface RecipeIngredientSkeleton
 // RecipeIngredient Entry 타입 정의
 export type RecipeIngredient = Entry<RecipeIngredientSkeleton>;
 
+/** Category 타입 정의 **/
+
+// Category Content Type의 필드 정의
+export interface CategoryFields {
+  name: string; // 카테고리 이름 (Short text, 필수)
+  image?: {
+    fields: {
+      file: {
+        url: string;
+      };
+    };
+  }; // 카테고리 이미지 (Media - Image, 선택)
+  order?: number; // 정렬 순서 (Integer, 선택)
+}
+
+// Category Content Type의 스켈레톤 정의
+export interface CategorySkeleton extends EntrySkeletonType<CategoryFields> {
+  fields: CategoryFields;
+  contentTypeId: "category"; // Contentful에서 설정한 콘텐츠 타입 ID
+}
+
+// Category Entry 타입 정의
+export type Category = Entry<CategorySkeleton>;
+
 /** Recipe 타입 정의 **/
 
 // Recipe Content Type의 필드 정의
@@ -59,7 +81,8 @@ export interface RecipeFields {
   slug: string; // 슬러그 (Short text, 필수)
   description: Document; // 설명 (Rich Text, 필수)
   image: Asset[]; // 이미지 목록 (Media - Image, 필수)
-  category: string; // 카테고리 (Short text, 필수)
+  category: string; // 기존 카테고리 (Short text, 웹사이트 API용)
+  categories: Category[]; // 새로운 카테고리 (Reference - Category, 다중)
   preparationTime: number; // 준비 시간 (Integer, 필수)
   servings: number; // 인분 (Integer, 필수)
   ingredients: RecipeIngredient[]; // 재료 목록 (Reference - RecipeIngredient, 필수)
