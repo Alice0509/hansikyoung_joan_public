@@ -91,7 +91,7 @@ const IngredientScreen: React.FC<IngredientScreenProps> = ({
     return (
       <View style={styles.centeredContainer}>
         <Text style={styles.notFoundText}>
-          이미지가 없는 재료는 표시되지 않습니다.
+          Ingredients without images will not be displayed.
         </Text>
       </View>
     );
@@ -106,7 +106,7 @@ const IngredientScreen: React.FC<IngredientScreenProps> = ({
       {slug && <Text style={styles.slug}>Slug: {slug}</Text>}
       {germanMeatCut && (
         <Text style={styles.germanMeatCut}>
-          독일식 고기 부위: {germanMeatCut}
+          German-style meat cuts: {germanMeatCut}
         </Text>
       )}
       {description ? (

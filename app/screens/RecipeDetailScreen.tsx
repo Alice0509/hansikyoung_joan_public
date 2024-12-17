@@ -152,25 +152,25 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route, navigation }) => {
       <Text style={styles.title}>{titel || "Untitled"}</Text>
 
       {/* 카테고리 */}
-      <Text style={styles.sectionHeader}>카테고리:</Text>
+      <Text style={styles.sectionHeader}>Category:</Text>
       <Text style={styles.text}>{category || "No Category"}</Text>
 
       {/* 준비 시간 */}
-      <Text style={styles.sectionHeader}>준비 시간:</Text>
+      <Text style={styles.sectionHeader}>Preparation Time:</Text>
       <Text style={styles.text}>
         {preparationTime ? `${preparationTime} 분` : "N/A"}
       </Text>
 
       {/* 인분 */}
-      <Text style={styles.sectionHeader}>인분:</Text>
+      <Text style={styles.sectionHeader}>Servings:</Text>
       <Text style={styles.text}>{servings ? `${servings} 인분` : "N/A"}</Text>
 
       {/* 재료 */}
-      <Text style={styles.sectionHeader}>재료:</Text>
+      <Text style={styles.sectionHeader}>Ingredients:</Text>
       <View style={styles.ingredientsContainer}>{renderIngredients()}</View>
 
       {/* 설명 */}
-      <Text style={styles.sectionHeader}>설명:</Text>
+      <Text style={styles.sectionHeader}>Description:</Text>
       {description ? (
         <RichTextRenderer content={description} />
       ) : (
@@ -178,7 +178,7 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route, navigation }) => {
       )}
 
       {/* 조리 방법 */}
-      <Text style={styles.sectionHeader}>조리 방법:</Text>
+      <Text style={styles.sectionHeader}>Instructions:</Text>
       {instructions ? (
         <RichTextRenderer content={instructions} />
       ) : (
@@ -188,7 +188,7 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route, navigation }) => {
       {/* YouTube 썸네일 */}
       {youTubeUrl && (
         <View style={styles.youtubeContainer}>
-          <Text style={styles.sectionHeader}>유튜브 영상:</Text>
+          <Text style={styles.sectionHeader}>Video for reference:</Text>
           {thumbnail ? (
             <TouchableOpacity onPress={() => Linking.openURL(youTubeUrl)}>
               <Image
@@ -212,7 +212,7 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route, navigation }) => {
       {/* 비디오 파일 */}
       {videoFile && (
         <View style={styles.videoContainer}>
-          <Text style={styles.sectionHeader}>비디오 파일:</Text>
+          <Text style={styles.sectionHeader}>Video for reference:</Text>
           <TouchableOpacity
             onPress={() =>
               Linking.openURL(`https:${videoFile.fields.file.url}`)

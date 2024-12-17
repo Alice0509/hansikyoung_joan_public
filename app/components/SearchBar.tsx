@@ -1,17 +1,19 @@
-//app/components/SearchBar.tsx
+// app/components/SearchBar.tsx
 
 import React from "react";
 import { View, TextInput, StyleSheet } from "react-native";
 import { useSearch } from "../contexts/SearchContext";
+import { useTranslation } from "react-i18next"; // 번역 키 사용을 위해 추가
 
 const SearchBar = () => {
   const { keyword, setKeyword } = useSearch();
+  const { t } = useTranslation(); // 번역 함수
 
   return (
     <View style={styles.container}>
       <TextInput
         style={styles.input}
-        placeholder="Search recipes..."
+        placeholder={t("search_recipes")} // 번역 키 사용
         value={keyword}
         onChangeText={setKeyword}
       />

@@ -8,7 +8,6 @@ import {
   StyleSheet,
   ActivityIndicator,
   ScrollView,
-  Button,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
@@ -16,6 +15,11 @@ import { getAllCategories, getRecipesByCategory } from "../lib/contentful";
 import { Entry } from "contentful";
 import { Category, RecipeEntry } from "../types/Recipe";
 import RecipeCard from "../components/RecipeCard";
+import { useSearch } from "../contexts/SearchContext";
+import { useTranslation } from "react-i18next"; // 번역 키 사용을 위해 추가
+import SearchBar from "../components/SearchBar";
+import { useDebounce } from "use-debounce";
+import { documentToPlainTextString } from "@contentful/rich-text-plain-text-renderer"; // Rich Text 변환
 
 type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, "Main">;
 
@@ -26,7 +30,13 @@ interface CategoryWithRecipes {
 
 const HomeScreen: React.FC = () => {
   const navigation = useNavigation<HomeScreenNavigationProp>();
+  const { t } = useTranslation();
+  const { keyword, setKeyword } = useSearch();
+  const [debouncedKeyword] = useDebounce(keyword, 300); // 300ms debounce
   const [categoriesWithRecipes, setCategoriesWithRecipes] = useState<
+    CategoryWithRecipes[]
+  >([]);
+  const [filteredCategories, setFilteredCategories] = useState<
     CategoryWithRecipes[]
   >([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -35,7 +45,7 @@ const HomeScreen: React.FC = () => {
   useEffect(() => {
     const fetchCategoriesAndRecipes = async () => {
       try {
-        const categories = await getAllCategories("en");
+        const categories = await getAllCategories("en"); // 언어 코드 동적으로 처리 가능
         const categoriesData: CategoryWithRecipes[] = [];
 
         // 각 카테고리에 대한 레시피를 비동기적으로 가져오기
@@ -53,16 +63,51 @@ const HomeScreen: React.FC = () => {
         );
 
         setCategoriesWithRecipes(categoriesData);
+        setFilteredCategories(categoriesData); // 초기 상태 설정
       } catch (error) {
         console.error("Error fetching categories and recipes:", error);
-        setError("Failed to load categories and recipes.");
+        setError(t("failed_to_load_categories_and_recipes"));
       } finally {
         setLoading(false);
       }
     };
 
     fetchCategoriesAndRecipes();
-  }, []);
+  }, [t]);
+
+  useEffect(() => {
+    if (debouncedKeyword.trim() === "") {
+      setFilteredCategories(categoriesWithRecipes);
+    } else {
+      const lowerKeyword = debouncedKeyword.toLowerCase();
+      const filtered = categoriesWithRecipes
+        .map(({ category, recipes }) => {
+          const filteredRecipes = recipes.filter((recipe: RecipeEntry) => {
+            const name = recipe.fields.name || "";
+            let description = "";
+
+            if (recipe.fields.description) {
+              if (typeof recipe.fields.description === "string") {
+                description = recipe.fields.description;
+              } else {
+                // Rich Text 필드인 경우 플레인 텍스트로 변환
+                description = documentToPlainTextString(
+                  recipe.fields.description,
+                );
+              }
+            }
+
+            return (
+              name.toLowerCase().includes(lowerKeyword) ||
+              description.toLowerCase().includes(lowerKeyword)
+            );
+          });
+          return { category, recipes: filteredRecipes };
+        })
+        .filter(({ recipes }) => recipes.length > 0);
+      setFilteredCategories(filtered);
+    }
+  }, [debouncedKeyword, categoriesWithRecipes]);
 
   const renderRecipeItem = ({ item }: { item: RecipeEntry }) => {
     if (!item || !item.sys) {
@@ -100,41 +145,42 @@ const HomeScreen: React.FC = () => {
   if (categoriesWithRecipes.length === 0) {
     return (
       <View style={styles.centeredContainer}>
-        <Text style={styles.noDataText}>No categories available.</Text>
+        <Text style={styles.noDataText}>{t("no_categories_available")}</Text>
       </View>
     );
   }
 
   return (
-    <ScrollView style={styles.container}>
-      <Button
-        title="View All Recipes"
-        onPress={() => navigation.navigate("RecipeList")}
-      />
-      {categoriesWithRecipes.map(({ category, recipes }) => (
-        <View key={category.sys.id} style={styles.categorySection}>
-          <Text style={styles.categoryTitle}>{category.fields.name}</Text>
-          {recipes.length > 0 ? (
-            <FlatList
-              data={recipes}
-              keyExtractor={(item) => item.sys.id}
-              renderItem={renderRecipeItem}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.recipesList}
-              initialNumToRender={5}
-              windowSize={5}
-              ItemSeparatorComponent={() => <View style={{ width: 15 }} />}
-              ListHeaderComponent={<View style={{ width: 10 }} />}
-            />
-          ) : (
-            <Text style={styles.noRecipesText}>
-              No recipes available in this category.
-            </Text>
-          )}
-        </View>
-      ))}
-    </ScrollView>
+    <View style={styles.container}>
+      {/* 검색 바 추가 */}
+      <SearchBar />
+
+      <ScrollView>
+        {filteredCategories.map(({ category, recipes }) => (
+          <View key={category.sys.id} style={styles.categorySection}>
+            <Text style={styles.categoryTitle}>{category.fields.name}</Text>
+            {recipes.length > 0 ? (
+              <FlatList
+                data={recipes}
+                keyExtractor={(item) => item.sys.id}
+                renderItem={renderRecipeItem}
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.recipesList}
+                initialNumToRender={5}
+                windowSize={5}
+                ItemSeparatorComponent={() => <View style={{ width: 15 }} />}
+                ListHeaderComponent={<View style={{ width: 10 }} />}
+              />
+            ) : (
+              <Text style={styles.noRecipesText}>
+                {t("no_recipes_available")}
+              </Text>
+            )}
+          </View>
+        ))}
+      </ScrollView>
+    </View>
   );
 };
 
