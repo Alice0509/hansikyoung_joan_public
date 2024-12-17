@@ -1,13 +1,13 @@
 // app/screens/SettingsScreen.tsx
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   TouchableOpacity,
   StyleSheet,
-  TextInput,
   Button,
   Linking,
+  ScrollView,
 } from "react-native";
 import { useTranslation } from "react-i18next";
 import { useLanguage } from "../contexts/LanguageContext";
@@ -15,11 +15,12 @@ import { useTheme } from "../contexts/ThemeContext";
 import { useFontSize } from "../contexts/FontSizeContext";
 import Ionicons from "@expo/vector-icons/Ionicons"; // 아이콘 사용
 import CustomText from "../components/CustomText";
+import Constants from 'expo-constants'; // 앱 버전 정보 가져오기
 
 const SettingsScreen: React.FC = () => {
   const { t } = useTranslation();
   const { language, setLanguage } = useLanguage();
-  const { theme, toggleTheme } = useTheme();
+  const { theme, toggleTheme, colors } = useTheme();
   const { fontSize, setFontSize } = useFontSize();
 
   // 웹사이트 주소
@@ -60,135 +61,185 @@ const SettingsScreen: React.FC = () => {
     ).catch((err) => console.error("Failed to open privacy policy:", err));
   };
 
+  // 앱 버전 정보 가져오기
+  const appVersion = Constants.manifest?.version || "1.0.0";
+
   // 현재 테마와 글꼴 크기를 기반으로 동적으로 스타일 생성
-  const styles = getStyles(theme, fontSize);
+  const styles = getStyles(colors, fontSize);
 
   return (
-    <View style={styles.container}>
-      <CustomText style={styles.title}>{t("settings")}</CustomText>
+    <ScrollView style={styles.scrollContainer}>
+      <View style={styles.container}>
+        <CustomText style={styles.title}>{t("settings")}</CustomText>
 
-      {/* 언어 설정 */}
-      <CustomText style={styles.label}>{t("language")}:</CustomText>
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity
-          style={[
-            styles.button,
-            language === "en" ? styles.activeButton : null,
-          ]}
-          onPress={() => changeLanguage("en")}
-        >
-          <CustomText style={styles.buttonText}>{t("english")}</CustomText>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[
-            styles.button,
-            language === "de" ? styles.activeButton : null,
-          ]}
-          onPress={() => changeLanguage("de")}
-        >
-          <CustomText style={styles.buttonText}>{t("german")}</CustomText>
-        </TouchableOpacity>
+        {/* 언어 설정 섹션 */}
+        <View style={styles.section}>
+          <CustomText style={styles.sectionTitle}>
+            <Ionicons name="language-outline" size={20} color={colors.text} /> {t("language")}
+          </CustomText>
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity
+              style={[
+                styles.button,
+                language === "en" ? styles.activeButton : null,
+              ]}
+              onPress={() => changeLanguage("en")}
+            >
+              <CustomText style={styles.buttonText}>{t("english")}</CustomText>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.button,
+                language === "de" ? styles.activeButton : null,
+              ]}
+              onPress={() => changeLanguage("de")}
+            >
+              <CustomText style={styles.buttonText}>{t("german")}</CustomText>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* 테마 설정 섹션 */}
+        <View style={styles.section}>
+          <CustomText style={styles.sectionTitle}>
+            <Ionicons name="color-palette-outline" size={20} color={colors.text} /> {t("theme")}
+          </CustomText>
+          <TouchableOpacity style={styles.button} onPress={toggleTheme}>
+            <CustomText style={styles.buttonText}>
+              {theme === "light" ? t("dark_mode") : t("light_mode")}
+            </CustomText>
+          </TouchableOpacity>
+        </View>
+
+        {/* 글꼴 크기 조절 섹션 */}
+        <View style={styles.section}>
+          <CustomText style={styles.sectionTitle}>
+            <Ionicons name="text-outline" size={20} color={colors.text} /> {t("font_size")}
+          </CustomText>
+          <View style={styles.fontSizeContainer}>
+            <TouchableOpacity style={styles.smallButton} onPress={decreaseFontSize}>
+              <Ionicons name="remove-outline" size={20} color="#fff" />
+            </TouchableOpacity>
+            <CustomText style={styles.fontSizeText}>{fontSize}px</CustomText>
+            <TouchableOpacity style={styles.smallButton} onPress={increaseFontSize}>
+              <Ionicons name="add-outline" size={20} color="#fff" />
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* 피드백 섹션 */}
+        <View style={styles.section}>
+          <CustomText style={styles.sectionTitle}>
+            <Ionicons name="chatbubble-ellipses-outline" size={20} color={colors.text} /> {t("feedback")}
+          </CustomText>
+          <TouchableOpacity style={styles.button} onPress={sendFeedback}>
+            <CustomText style={styles.buttonText}>{t("send_feedback")}</CustomText>
+          </TouchableOpacity>
+        </View>
+
+        {/* 계정 섹션 */}
+        <View style={styles.section}>
+          <CustomText style={styles.sectionTitle}>
+            <Ionicons name="person-outline" size={20} color={colors.text} /> {t("account")}
+          </CustomText>
+          <TouchableOpacity style={styles.button} onPress={logout}>
+            <CustomText style={styles.buttonText}>{t("logout")}</CustomText>
+          </TouchableOpacity>
+        </View>
+
+        {/* 개인정보 보호 정책 섹션 */}
+        <View style={styles.section}>
+          <CustomText style={styles.sectionTitle}>
+            <Ionicons name="lock-closed-outline" size={20} color={colors.text} /> {t("privacy_policy")}
+          </CustomText>
+          <TouchableOpacity style={styles.button} onPress={openPrivacyPolicy}>
+            <CustomText style={styles.buttonText}>
+              https://www.leckere-koreanische-rezepte.de/privacy-policy
+            </CustomText>
+          </TouchableOpacity>
+        </View>
+
+        {/* 앱 정보 섹션 */}
+        <View style={styles.section}>
+          <CustomText style={styles.sectionTitle}>
+            <Ionicons name="information-circle-outline" size={20} color={colors.text} /> {t("app_info")}
+          </CustomText>
+          <TouchableOpacity style={styles.button} onPress={openWebsite}>
+            <CustomText style={styles.buttonText}>
+              https://www.leckere-koreanische-rezepte.de/
+            </CustomText>
+          </TouchableOpacity>
+          {/* 앱 버전 정보 추가 */}
+          <CustomText style={styles.appVersion}>
+            {t("app_version")}: {appVersion}
+          </CustomText>
+        </View>
       </View>
-
-      {/* 테마 설정 */}
-      <CustomText style={styles.label}>{t("theme")}:</CustomText>
-      <TouchableOpacity style={styles.button} onPress={toggleTheme}>
-        <CustomText style={styles.buttonText}>
-          {theme === "light" ? t("dark_mode") : t("light_mode")}
-        </CustomText>
-      </TouchableOpacity>
-
-      {/* 글꼴 크기 조절 */}
-      <CustomText style={styles.label}>{t("font_size")}:</CustomText>
-      <View style={styles.fontSizeContainer}>
-        <TouchableOpacity style={styles.smallButton} onPress={decreaseFontSize}>
-          <CustomText style={styles.fontSizeButtonText}>-</CustomText>
-        </TouchableOpacity>
-        <CustomText style={styles.fontSizeText}>{fontSize}px</CustomText>
-        <TouchableOpacity style={styles.smallButton} onPress={increaseFontSize}>
-          <CustomText style={styles.fontSizeButtonText}>+</CustomText>
-        </TouchableOpacity>
-      </View>
-
-      {/* 피드백 */}
-      <CustomText style={styles.label}>{t("feedback")}:</CustomText>
-      <TouchableOpacity style={styles.button} onPress={sendFeedback}>
-        <CustomText style={styles.buttonText}>{t("send_feedback")}</CustomText>
-      </TouchableOpacity>
-
-      {/* 로그아웃 */}
-      <CustomText style={styles.label}>{t("account")}:</CustomText>
-      <TouchableOpacity style={styles.button} onPress={logout}>
-        <CustomText style={styles.buttonText}>{t("logout")}</CustomText>
-      </TouchableOpacity>
-
-      {/* 개인정보 보호 정책 */}
-      <CustomText style={styles.label}>{t("privacy_policy")}:</CustomText>
-      <TouchableOpacity style={styles.button} onPress={openPrivacyPolicy}>
-        <CustomText style={styles.buttonText}>
-          https://www.leckere-koreanische-rezepte.de/privacy-policy
-        </CustomText>
-      </TouchableOpacity>
-
-      {/* 앱 정보 (웹사이트 링크) */}
-      <CustomText style={styles.label}>{t("app_info")}:</CustomText>
-      <TouchableOpacity style={styles.button} onPress={openWebsite}>
-        <CustomText style={styles.buttonText}>
-          https://www.leckere-koreanische-rezepte.de/
-        </CustomText>
-      </TouchableOpacity>
-    </View>
+    </ScrollView>
   );
 };
 
 // 테마와 글꼴 크기에 따라 동적으로 스타일 생성
-const getStyles = (theme: string, fontSize: number) =>
+const getStyles = (colors: any, fontSize: number) =>
   StyleSheet.create({
+    scrollContainer: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
     container: {
       flex: 1,
       padding: 20,
-      backgroundColor: theme === "dark" ? "#000" : "#fff",
     },
     title: {
       fontWeight: "bold",
       marginBottom: 20,
-      color: theme === "dark" ? "#fff" : "#000",
+      color: colors.text,
       fontSize: fontSize + 4,
+      textAlign: "center",
     },
-    label: {
-      marginTop: 20,
+    section: {
+      marginBottom: 30,
+    },
+    sectionTitle: {
+      flexDirection: "row",
+      alignItems: "center",
+      fontSize: fontSize + 2,
+      color: colors.text,
       marginBottom: 10,
-      color: theme === "dark" ? "#fff" : "#000",
-      fontSize: fontSize,
+      fontWeight: "600",
     },
     buttonContainer: {
       flexDirection: "row",
       justifyContent: "space-around",
     },
     button: {
-      padding: 10,
-      backgroundColor: "#007AFF",
-      borderRadius: 5,
-      marginVertical: 10,
+      flex: 1,
+      paddingVertical: 12,
+      paddingHorizontal: 10,
+      backgroundColor: colors.buttonBackground,
+      borderRadius: 8,
+      marginHorizontal: 5,
       alignItems: "center",
     },
     activeButton: {
-      backgroundColor: "#005BBB",
+      backgroundColor: colors.activeButtonBackground,
     },
     buttonText: {
-      color: "#fff",
+      color: colors.buttonText,
       fontSize: fontSize,
+      fontWeight: "500",
     },
     fontSizeContainer: {
       flexDirection: "row",
       alignItems: "center",
-      justifyContent: "space-around",
+      justifyContent: "center",
       marginVertical: 10,
     },
     smallButton: {
       padding: 10,
-      backgroundColor: "#007AFF",
+      backgroundColor: colors.buttonBackground,
       borderRadius: 5,
+      marginHorizontal: 20,
     },
     fontSizeButtonText: {
       color: "#fff",
@@ -196,7 +247,13 @@ const getStyles = (theme: string, fontSize: number) =>
     },
     fontSizeText: {
       fontSize: 16,
-      color: theme === "dark" ? "#fff" : "#000",
+      color: colors.text,
+    },
+    appVersion: {
+      marginTop: 10,
+      fontSize: 12,
+      color: colors.secondary,
+      textAlign: "center",
     },
   });
 

@@ -5,9 +5,9 @@ import { createStackNavigator } from "@react-navigation/stack";
 
 import SplashScreen from "../screens/SplashScreen";
 import MainTabNavigator from "./MainTabNavigator";
-import IngredientScreen from "../screens/IngredientScreen";
 import RecipeDetailScreen from "../screens/RecipeDetailScreen";
-import FavoritesScreen from "../screens/FavoritesScreen";
+import IngredientDetailScreen from "../screens/IngredientDetailScreen";
+// import FavoritesScreen from "../screens/FavoritesScreen"; // Stack Navigator에서 제거
 
 import { RootStackParamList } from "./types";
 
@@ -28,22 +28,19 @@ const MainNavigator: React.FC = () => {
         component={MainTabNavigator}
         options={{ headerShown: false }}
       />
-      {/* IngredientScreen 및 RecipeDetailScreen 등록 */}
-      <Stack.Screen
-        name="Ingredient"
-        component={IngredientScreen}
-        options={{ title: "Ingredient Details" }}
-      />
+      {/* RecipeDetailScreen 등록 */}
       <Stack.Screen
         name="RecipeDetail"
         component={RecipeDetailScreen}
         options={{ title: "Recipe Details" }}
       />
+      {/* IngredientDetailScreen 등록 */}
       <Stack.Screen
-        name="Favorites"
-        component={FavoritesScreen}
-        options={{ title: "Favorites" }}
+        name="IngredientDetail"
+        component={IngredientDetailScreen}
+        options={{ title: "Ingredient Details" }}
       />
+      {/* FavoritesScreen 제거 */}
     </Stack.Navigator>
   );
 };

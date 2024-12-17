@@ -1,4 +1,4 @@
-// app/screens/IngredientScreen.tsx
+// app/screens/IngredientDetailScreen.tsx
 
 import React, { useEffect, useState } from "react";
 import {
@@ -16,23 +16,49 @@ import { RootStackParamList } from "../navigation/types";
 import RichTextRenderer from "../components/RichTextRenderer"; // RichTextRenderer 임포트
 import { Entry } from "contentful"; // Contentful Entry 타입 임포트
 import { Ingredient } from "../types/Recipe"; // Ingredient 타입 임포트
+import { useLanguage } from "../contexts/LanguageContext"; // LanguageContext 임포트
 
-type IngredientScreenRouteProp = RouteProp<RootStackParamList, "Ingredient">;
-type IngredientScreenNavigationProp = StackNavigationProp<
+type IngredientDetailScreenRouteProp = RouteProp<
   RootStackParamList,
-  "Ingredient"
+  "IngredientDetail"
+>;
+type IngredientDetailScreenNavigationProp = StackNavigationProp<
+  RootStackParamList,
+  "IngredientDetail"
 >;
 
-interface IngredientScreenProps {
-  route: IngredientScreenRouteProp;
-  navigation: IngredientScreenNavigationProp;
+interface IngredientDetailScreenProps {
+  route: IngredientDetailScreenRouteProp;
+  navigation: IngredientDetailScreenNavigationProp;
 }
 
-const IngredientScreen: React.FC<IngredientScreenProps> = ({
+const IngredientDetailScreen: React.FC<IngredientDetailScreenProps> = ({
   route,
   navigation,
 }) => {
+  console.log("route.params:", route.params); // 추가
+
+  // 1. route.params가 정의되었는지 확인
+  if (!route.params) {
+    return (
+      <View style={styles.centeredContainer}>
+        <Text style={styles.notFoundText}>No parameters passed.</Text>
+      </View>
+    );
+  }
+
   const { ingredientId, locale } = route.params;
+
+  // 2. ingredientId가 존재하는지 확인
+  if (!ingredientId) {
+    return (
+      <View style={styles.centeredContainer}>
+        <Text style={styles.notFoundText}>Ingredient ID is missing.</Text>
+      </View>
+    );
+  }
+
+  const { language } = useLanguage(); // 현재 언어 가져오기
   const [ingredient, setIngredient] = useState<Entry<Ingredient> | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -41,12 +67,12 @@ const IngredientScreen: React.FC<IngredientScreenProps> = ({
     const fetchIngredient = async () => {
       try {
         console.log(
-          `Route Params - ingredientId: ${ingredientId}, Locale: ${locale}`,
+          `Route Params - ingredientId: ${ingredientId}, Language: ${language}`,
         );
         console.log(
-          `Fetching ingredient with ID: ${ingredientId}, Locale: ${locale}`,
+          `Fetching ingredient with ID: ${ingredientId}, Language: ${language}`,
         );
-        const data = await getIngredientById(ingredientId, locale);
+        const data = await getIngredientById(ingredientId, language); // 언어 적용
         setIngredient(data);
         console.log("Fetched Ingredient:", JSON.stringify(data, null, 2)); // 응답 데이터 로그
       } catch (error) {
@@ -58,7 +84,7 @@ const IngredientScreen: React.FC<IngredientScreenProps> = ({
     };
 
     fetchIngredient();
-  }, [ingredientId, locale]);
+  }, [ingredientId, language]); // 언어가 변경될 때마다 재페칭
 
   if (loading) {
     return (
@@ -103,7 +129,6 @@ const IngredientScreen: React.FC<IngredientScreenProps> = ({
     <ScrollView contentContainerStyle={styles.container}>
       <Image source={{ uri: imageUrl }} style={styles.image} />
       <Text style={styles.name}>{name}</Text>
-      {slug && <Text style={styles.slug}>Slug: {slug}</Text>}
       {germanMeatCut && (
         <Text style={styles.germanMeatCut}>
           German-style meat cuts: {germanMeatCut}
@@ -180,4 +205,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default IngredientScreen;
+export default IngredientDetailScreen;

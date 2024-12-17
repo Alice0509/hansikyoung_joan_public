@@ -19,6 +19,7 @@ import RichTextRenderer from "../components/RichTextRenderer";
 import { RecipeEntry, RecipeIngredient, Ingredient } from "../types/Recipe";
 import { RootStackParamList } from "../navigation/types";
 import { getThumbnailFromEmbedUrl } from "../lib/getYouTubeThumbnail";
+import { useLanguage } from "../contexts/LanguageContext"; // LanguageContext 임포트
 
 type RecipeScreenRouteProp = RouteProp<RootStackParamList, "RecipeDetail">;
 type RecipeScreenNavigationProp = StackNavigationProp<
@@ -33,6 +34,7 @@ interface RecipeScreenProps {
 
 const RecipeScreen: React.FC<RecipeScreenProps> = ({ route, navigation }) => {
   const { recipeId } = route.params;
+  const { language } = useLanguage(); // 현재 언어 가져오기
   const [recipe, setRecipe] = useState<RecipeEntry | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [thumbnail, setThumbnail] = useState<string | null>(null);
@@ -40,13 +42,15 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route, navigation }) => {
   useEffect(() => {
     const fetchRecipe = async () => {
       try {
-        const data = await getRecipeById(recipeId, "en");
+        const data = await getRecipeById(recipeId, language); // 언어 적용
         setRecipe(data);
 
         if (data.fields.youTubeUrl) {
           const thumb = getThumbnailFromEmbedUrl(data.fields.youTubeUrl);
           setThumbnail(thumb);
         }
+
+        console.log("Fetched Recipe:", data); // 데이터 확인
       } catch (error) {
         console.error("Error fetching recipe details:", error);
       } finally {
@@ -55,12 +59,12 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route, navigation }) => {
     };
 
     fetchRecipe();
-  }, [recipeId]);
+  }, [recipeId, language]); // 언어가 변경될 때마다 재페칭
 
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#0000ff" />
+        <ActivityIndicator size="large" color="#007AFF" />
       </View>
     );
   }
@@ -86,10 +90,19 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route, navigation }) => {
     youTubeUrl,
   } = recipe.fields;
 
-  // 이미지 URL이 배열 형태로 제공되는지 확인
-  const imageUrl = image?.[0]?.fields?.file?.url
-    ? `https:${image[0].fields.file.url}`
-    : null;
+  // 이미지 URL 설정: Contentful 이미지 > YouTube 썸네일 > 기본 이미지
+  let displayImageSource;
+
+  if (image?.[0]?.fields?.file?.url) {
+    displayImageSource = { uri: `https:${image[0].fields.file.url}` };
+    console.log("Displaying Contentful Image:", displayImageSource.uri);
+  } else if (thumbnail) {
+    displayImageSource = { uri: thumbnail };
+    console.log("Displaying YouTube Thumbnail:", displayImageSource.uri);
+  } else {
+    displayImageSource = require("../../assets/images/default.png");
+    console.log("Displaying Default Image");
+  }
 
   // 모든 재료 표시 (이미지가 있는 재료에만 링크 걸기)
   const renderIngredients = () => {
@@ -109,13 +122,13 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route, navigation }) => {
 
         return (
           <View key={recipeIngredient.sys.id} style={styles.ingredientItem}>
-            {/* 재료 이름 표시 (링크 걸기) */}
+            {/* 재료 이름 표시 (이미지가 있을 경우 네비게이션 링크 걸기) */}
             {hasImage ? (
               <TouchableOpacity
                 onPress={() =>
-                  navigation.navigate("Ingredient", {
+                  navigation.navigate("IngredientDetail", {
+                    // 스크린 이름 수정
                     ingredientId: ingredientId,
-                    locale: "en",
                   })
                 }
               >
@@ -139,14 +152,14 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route, navigation }) => {
       contentContainerStyle={styles.scrollContent}
     >
       {/* 이미지 렌더링 */}
-      {imageUrl ? (
-        <Image source={{ uri: imageUrl }} style={styles.image} />
-      ) : (
-        <Image
-          source={require("../../assets/images/default.png")}
-          style={styles.image}
-        />
-      )}
+      <Image
+        source={displayImageSource}
+        style={styles.image}
+        resizeMode="cover"
+        onError={(error) =>
+          console.error("Failed to load image:", error.nativeEvent.error)
+        }
+      />
 
       {/* 제목 */}
       <Text style={styles.title}>{titel || "Untitled"}</Text>
@@ -185,7 +198,7 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route, navigation }) => {
         <Text style={styles.text}>No Instructions Available</Text>
       )}
 
-      {/* YouTube 썸네일 */}
+      {/* YouTube 썸네일 또는 비디오 링크 */}
       {youTubeUrl && (
         <View style={styles.youtubeContainer}>
           <Text style={styles.sectionHeader}>Video for reference:</Text>
@@ -195,7 +208,9 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route, navigation }) => {
                 source={{ uri: thumbnail }}
                 style={styles.youtubeImage}
                 resizeMode="cover"
-                onError={() => console.error("Failed to load thumbnail image")}
+                onError={() =>
+                  console.error("Failed to load YouTube thumbnail image")
+                }
               />
               <View style={styles.playButton}>
                 <Text style={styles.playButtonText}>▶</Text>
@@ -250,6 +265,7 @@ const styles = StyleSheet.create({
     width: "100%",
     height: 200,
     borderRadius: 8,
+    marginBottom: 10,
   },
   title: {
     fontSize: 24,

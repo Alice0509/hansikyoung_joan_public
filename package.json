@@ -5,7 +5,7 @@
     "@expo/metro-config": "^0.19.7",
     "@expo/metro-runtime": "~4.0.0",
     "@expo/prebuild-config": "~8.0.0",
-    "@expo/vector-icons": "^14.0.2",
+    "@expo/vector-icons": "^14.0.4",
     "@react-native-async-storage/async-storage": "1.23.1",
     "@react-native-community/masked-view": "^0.1.11",
     "@react-native-community/netinfo": "^11.4.1",
@@ -25,6 +25,7 @@
     "expo-speech": "~13.0.0",
     "expo-status-bar": "~2.0.0",
     "expo-system-ui": "^4.0.6",
+    "expo-updates": "^0.26.10",
     "i18next": "^24.1.0",
     "metro": "^0.81.0",
     "react": "18.3.1",
@@ -42,6 +43,7 @@
     "react-native-vector-icons": "^10.2.0",
     "react-native-web": "~0.19.13",
     "react-native-webview": "13.12.5",
+    "react-query": "^3.39.3",
     "use-debounce": "^10.0.4"
   },
   "devDependencies": {

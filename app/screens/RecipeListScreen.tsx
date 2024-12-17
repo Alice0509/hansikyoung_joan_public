@@ -3,45 +3,43 @@
 import React, { useEffect, useState } from "react";
 import {
   View,
-  Text,
   FlatList,
   StyleSheet,
   ActivityIndicator,
+  Text,
 } from "react-native";
+import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
-import { getAllRecipes, getRecipesByCategory } from "../lib/contentful";
-import { RecipeEntry } from "../types/Recipe";
 import { RootStackParamList } from "../navigation/types";
-import RecipeCard from "../components/RecipeCard";
-
-type RecipeListScreenRouteProp = RouteProp<RootStackParamList, "Main">;
+import { Recipe } from "../types/Recipe";
+import RecipeCard from "../components/RecipeCard"; // RecipeCard 임포트
+import { getAllRecipes } from "../lib/contentful"; // getAllRecipes 임포트
 
 type RecipeListScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
-  "Main"
+  "RecipeList"
 >;
 
 const RecipeListScreen: React.FC = () => {
   const navigation = useNavigation<RecipeListScreenNavigationProp>();
-  const route = useRoute<RecipeListScreenRouteProp>();
-  const { categoryId } = route.params || {};
-
-  const [recipes, setRecipes] = useState<RecipeEntry[]>([]);
+  const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchRecipes = async () => {
       try {
-        let items: RecipeEntry[] = [];
-        if (categoryId) {
-          items = await getRecipesByCategory(categoryId, "en");
-        } else {
-          items = await getAllRecipes("en");
-        }
-        console.log("Fetched recipes:", items); // 데이터 확인
-        setRecipes(items);
+        const data = await getAllRecipes("en"); // 필요한 locale로 설정
+        // 이미지가 있거나 유튜브 URL이 있는 레시피만 필터링
+        const filteredData = data.filter(
+          (recipe) =>
+            (recipe.fields.image &&
+              recipe.fields.image.length > 0 &&
+              recipe.fields.image[0].fields.file.url) ||
+            recipe.fields.youTubeUrl,
+        );
+        setRecipes(filteredData);
+        console.log("Fetched Recipes:", filteredData);
       } catch (error) {
         console.error("Error fetching recipes:", error);
         setError("Failed to load recipes.");
@@ -51,25 +49,21 @@ const RecipeListScreen: React.FC = () => {
     };
 
     fetchRecipes();
-  }, [categoryId]);
+  }, []);
 
-  const renderItem = ({ item }: { item: RecipeEntry }) => {
-    if (!item || !item.sys) {
-      console.warn("Invalid recipe item:", item);
-      return null; // 또는 대체 UI
-    }
-
-    return (
-      <RecipeCard
-        recipe={item}
-        onPress={
-          () => navigation.navigate("RecipeDetail", { recipeId: item.sys.id }) // 스크린 이름 일치
-        }
-        fullWidth={true} // 전체 너비 사용
-        showCategory={false} // 카테고리 정보 표시 안 함
-      />
-    );
-  };
+  const renderItem = ({ item }: { item: Recipe }) => (
+    <RecipeCard
+      recipe={item}
+      onPress={() =>
+        navigation.navigate("RecipeDetail", {
+          recipeId: item.sys.id,
+          locale: "en",
+        })
+      }
+      fullWidth={true} // 전체 너비 사용
+      showCategory={true}
+    />
+  );
 
   if (loading) {
     return (
@@ -105,7 +99,6 @@ const RecipeListScreen: React.FC = () => {
         showsVerticalScrollIndicator={false}
         initialNumToRender={10}
         windowSize={5}
-        // 단일 열 레이아웃으로 유지
       />
     </View>
   );
@@ -114,24 +107,23 @@ const RecipeListScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    padding: 20,
     backgroundColor: "#fff",
-    paddingHorizontal: 20, // 좌우 패딩 추가
-    paddingTop: 10,
-  },
-  centeredContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    paddingHorizontal: 20, // 좌우 패딩 추가
   },
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
   },
+  centeredContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 20,
+  },
   listContainer: {
     paddingBottom: 20,
-    // 필요에 따라 추가 패딩 또는 마진 설정
+    // alignItems: "center", // 전체 너비 사용 시 필요 없음
   },
   errorText: {
     textAlign: "center",

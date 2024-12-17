@@ -21,10 +21,17 @@ const CategoryCard: React.FC<CategoryCardProps> = ({ category, onPress }) => {
     ? `https:${category.fields.image.fields.file.url}`
     : null;
 
+  // 디버깅용 로그 추가
+  console.log(
+    `CategoryCard - Category ID: ${category.sys.id}, Name: ${category.fields.name}`,
+  );
+
   return (
     <TouchableOpacity style={styles.card} onPress={onPress}>
       {imageUrl && <Image source={{ uri: imageUrl }} style={styles.image} />}
       <Text style={styles.cardTitle}>{category.fields.name}</Text>
+      {/* 추가적인 텍스트가 있다면 번역하여 표시 */}
+      {/* <Text>{t("additional_text_key")}</Text> */}
     </TouchableOpacity>
   );
 };

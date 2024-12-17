@@ -80,14 +80,24 @@ export interface RecipeFields {
   titel: string; // 제목 (Short text, 필수)
   slug: string; // 슬러그 (Short text, 필수)
   description: Document; // 설명 (Rich Text, 필수)
-  image: Asset[]; // 이미지 목록 (Media - Image, 필수)
+  image: {
+    file: {
+      url: string;
+    };
+  }[]; // 이미지 목록 (Media - Image, 필수)
   category: string; // 기존 카테고리 (Short text, 웹사이트 API용)
   categories: Category[]; // 새로운 카테고리 (Reference - Category, 다중)
   preparationTime: number; // 준비 시간 (Integer, 필수)
   servings: number; // 인분 (Integer, 필수)
   ingredients: RecipeIngredient[]; // 재료 목록 (Reference - RecipeIngredient, 필수)
   instructions: Document; // 조리 방법 (Rich Text, 필수)
-  videoFile?: Asset; // 비디오 파일 (Media - Video, 선택)
+  videoFile?: {
+    fields: {
+      file: {
+        url: string;
+      };
+    };
+  }; // 비디오 파일 (Media - Video, 선택)
   youTubeUrl?: string; // YouTube URL (Short text, 선택)
 }
 
@@ -98,14 +108,20 @@ export interface RecipeSkeleton extends EntrySkeletonType<RecipeFields> {
 }
 
 // Recipe Entry 타입 정의
-export type RecipeEntry = Entry<RecipeSkeleton>;
+export type Recipe = Entry<RecipeSkeleton>;
 
 /** Gallery 타입 정의 **/
 
 // Gallery Content Type의 필드 정의
 export interface GalleryFields {
   titel: string; // 제목 (Short text, 필수)
-  bild: Asset[]; // 이미지 목록 (Media - Image, 필수)
+  bild: {
+    fields: {
+      file: {
+        url: string;
+      };
+    };
+  }[]; // 이미지 목록 (Media - Image, 필수)
   location: Location; // 위치 정보 (Location, 필수)
   businessName: string; // 상호명 (Short text, 필수)
 }

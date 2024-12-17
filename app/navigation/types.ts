@@ -3,10 +3,8 @@
 export type RootStackParamList = {
   Main: undefined;
   Home: undefined;
-  RecipeDetail: { recipeId: string }; // 'Recipe' → 'RecipeDetail'으로 변경
-  Favorites: undefined;
-  Ingredient: { ingredientId: string; locale: string };
-  IngredientDetail: { ingredientId: string };
+  RecipeDetail: { recipeId: string; locale?: string };
+  IngredientDetail: { ingredientId: string; locale?: string };
   CategoryRecipeList: { categoryId: string };
   Settings: undefined;
   Splash: undefined;
@@ -16,6 +14,6 @@ export type TabParamList = {
   Home: undefined;
   RecipeList: undefined; // 탭 자체에서는 직접 접근하지 않도록 undefined로 설정
   Ingredients: undefined;
-  Favorites: undefined;
+  Favorites: undefined; //Tab Navigator 내에만 존재
   Settings: undefined;
 };

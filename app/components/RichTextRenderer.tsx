@@ -1,16 +1,28 @@
 // app/components/RichTextRenderer.tsx
 
 import React from "react";
-import { StyleSheet, Text, Image, View, Linking } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  Image,
+  View,
+  Linking,
+  Dimensions,
+} from "react-native";
 import RenderHtml from "react-native-render-html";
 import { RichTextDocument } from "../types/RichText";
-import { Dimensions } from "react-native";
 
 interface RichTextRendererProps {
-  content: RichTextDocument;
+  content?: RichTextDocument; // optional로 변경
 }
 
-const RichTextRenderer: React.FC<RichTextRendererProps> = ({ content }) => {
+const RichTextRenderer: React.FC<RichTextRendererProps> = ({
+  content = null,
+}) => {
+  if (!content) {
+    return <Text style={styles.text}>No Content Available</Text>;
+  }
+
   const { width } = Dimensions.get("window");
 
   const richTextToHtml = (richText: RichTextDocument): string => {
@@ -96,6 +108,10 @@ const RichTextRenderer: React.FC<RichTextRendererProps> = ({ content }) => {
 };
 
 const styles = StyleSheet.create({
+  text: {
+    fontSize: 16,
+    color: "#333",
+  },
   paragraph: {
     fontSize: 16,
     marginVertical: 8,

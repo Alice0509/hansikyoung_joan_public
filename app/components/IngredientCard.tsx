@@ -10,7 +10,7 @@ import { RootStackParamList } from "../navigation/types";
 
 type IngredientCardNavigationProp = StackNavigationProp<
   RootStackParamList,
-  "Ingredient"
+  "IngredientDetail" // "IngredientDetail"으로 변경
 >;
 
 interface IngredientCardProps {
@@ -28,11 +28,20 @@ const IngredientCard: React.FC<IngredientCardProps> = ({ ingredient }) => {
 
   const imageUrl = `https:${bild.fields.file.url}`;
 
+  // 네비게이션 호출 전 파라미터 확인을 위한 로그 추가
+  console.log(
+    "Navigating to IngredientDetail with ID:",
+    ingredient.sys.id,
+    "and Locale:",
+    "en",
+  );
+
   return (
     <TouchableOpacity
       style={styles.card}
       onPress={() =>
-        navigation.navigate("Ingredient", {
+        navigation.navigate("IngredientDetail", {
+          // "Ingredient"에서 "IngredientDetail"로 변경
           ingredientId: ingredient.sys.id,
           locale: "en", // 필요한 locale을 전달
         })

@@ -10,15 +10,22 @@ import {
   Platform,
 } from "react-native";
 import { useFavorites } from "../contexts/FavoritesContext";
-import { Entry } from "contentful";
 import { Recipe } from "../types/Recipe";
 import { getThumbnailFromEmbedUrl } from "../lib/getYouTubeThumbnail";
 import { Ionicons } from "@expo/vector-icons"; // Expo 벡터 아이콘 사용
+import { useNavigation } from "@react-navigation/native";
+import { StackNavigationProp } from "@react-navigation/stack";
+import { RootStackParamList } from "../navigation/types";
+
+type RecipeCardNavigationProp = StackNavigationProp<
+  RootStackParamList,
+  "RecipeDetail"
+>;
 
 interface RecipeCardProps {
-  recipe: Entry<Recipe>;
+  recipe: Recipe; // 올바른 타입
   onPress: () => void;
-  fullWidth?: boolean; // 전체 너비를 사용할지 여부
+  fullWidth?: boolean; // 전체 너비을 사용할지 여부
   showCategory?: boolean; // 카테고리 정보를 표시할지 여부
 }
 
@@ -28,6 +35,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
   fullWidth = false,
   showCategory = false,
 }) => {
+  const navigation = useNavigation<RecipeCardNavigationProp>();
   const { addFavorite, removeFavorite, isFavorite } = useFavorites();
   const recipeId = recipe.sys.id;
   const favorite = isFavorite(recipeId);
@@ -57,7 +65,12 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
   const categoryNames =
     recipe.fields?.categories && recipe.fields.categories.length > 0
       ? recipe.fields.categories.map((cat) => cat.fields.name).join(", ")
-      : "No Category";
+      : null; // "No Category" 대신 null로 설정
+
+  // 콘솔 로그 추가 (디버깅용)
+  console.log("Recipe Fields:", recipe.fields);
+  console.log("Title:", recipe.fields?.titel);
+  console.log("Image URL:", imageUrl);
 
   return (
     <TouchableOpacity
@@ -88,7 +101,9 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
         <Text style={styles.title}>
           {recipe.fields?.titel || "Untitled Recipe"}
         </Text>
-        {showCategory && <Text style={styles.category}>{categoryNames}</Text>}
+        {showCategory && categoryNames && (
+          <Text style={styles.category}>{categoryNames}</Text>
+        )}
       </View>
       {/* 즐겨찾기 버튼 */}
       <TouchableOpacity
