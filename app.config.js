@@ -33,7 +33,7 @@ export default ({ config }) => ({
     plugins: ["expo-localization"],
     ios: {
       bundleIdentifier: "com.joan.hansikyoungrecipes",
-      deploymentTarget: "18.2", // iOS 배포 대상
+      deploymentTarget: "16.7", // iOS 배포 대상
       infoPlist: {
         NSAppTransportSecurity: {
           NSExceptionDomains: {

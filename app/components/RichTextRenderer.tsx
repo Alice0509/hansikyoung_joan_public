@@ -1,26 +1,31 @@
 // app/components/RichTextRenderer.tsx
 
 import React from "react";
-import {
-  StyleSheet,
-  Text,
-  Image,
-  View,
-  Linking,
-  Dimensions,
-} from "react-native";
+import { StyleSheet, Image, Linking, Dimensions } from "react-native";
 import RenderHtml from "react-native-render-html";
 import { RichTextDocument } from "../types/RichText";
+import { useFontSize } from "../contexts/FontSizeContext"; // FontSizeContext 임포트
+import { useTheme } from "../contexts/ThemeContext"; // ThemeContext 임포트
 
 interface RichTextRendererProps {
-  content?: RichTextDocument; // optional로 변경
+  content?: RichTextDocument; // optional
 }
 
 const RichTextRenderer: React.FC<RichTextRendererProps> = ({
   content = null,
 }) => {
+  const { fontSize } = useFontSize();
+  const { colors } = useTheme();
+
   if (!content) {
-    return <Text style={styles.text}>No Content Available</Text>;
+    return (
+      <RenderHtml
+        contentWidth={Dimensions.get("window").width - 40}
+        source={{
+          html: `<p style="color: ${colors.text}; font-size: ${fontSize}px;">No Content Available</p>`,
+        }}
+      />
+    );
   }
 
   const { width } = Dimensions.get("window");
@@ -56,6 +61,10 @@ const RichTextRenderer: React.FC<RichTextRendererProps> = ({
               });
             }
             return text;
+          case "embedded-asset-block":
+            const url = node.data.target.fields.file.url;
+            const alt = node.data.target.fields.title || "";
+            return `<img src="https:${url}" alt="${alt}" />`;
           default:
             return "";
         }
@@ -69,21 +78,64 @@ const RichTextRenderer: React.FC<RichTextRendererProps> = ({
 
   const htmlContent = richTextToHtml(content);
 
+  const tagsStyles = {
+    p: {
+      fontSize: fontSize,
+      color: colors.text,
+      marginVertical: 8,
+    },
+    h1: {
+      fontSize: fontSize + 8,
+      fontWeight: "bold",
+      marginVertical: 8,
+      color: colors.text,
+    },
+    h2: {
+      fontSize: fontSize + 4,
+      fontWeight: "bold",
+      marginVertical: 8,
+      color: colors.text,
+    },
+    ul: {
+      marginVertical: 8,
+      paddingLeft: 16,
+    },
+    ol: {
+      marginVertical: 8,
+      paddingLeft: 16,
+    },
+    li: {
+      fontSize: fontSize,
+      color: colors.text,
+    },
+    a: {
+      color: "blue",
+      textDecorationLine: "underline",
+      fontSize: fontSize,
+    },
+    strong: {
+      fontWeight: "bold",
+      color: colors.text,
+      fontSize: fontSize,
+    },
+    em: {
+      fontStyle: "italic",
+      color: colors.text,
+      fontSize: fontSize,
+    },
+    img: {
+      width: width - 40, // same as contentWidth
+      height: 200,
+      borderRadius: 8,
+      marginVertical: 8,
+    },
+  };
+
   return (
     <RenderHtml
       contentWidth={width - 40}
       source={{ html: htmlContent }}
-      tagsStyles={{
-        p: styles.paragraph,
-        h1: styles.heading1,
-        h2: styles.heading2,
-        ul: styles.ulList,
-        ol: styles.olList,
-        li: styles.listItem,
-        a: styles.link,
-        strong: styles.bold,
-        em: styles.italic,
-      }}
+      tagsStyles={tagsStyles}
       renderersProps={{
         a: {
           onPress: (event, href) => {
@@ -94,10 +146,11 @@ const RichTextRenderer: React.FC<RichTextRendererProps> = ({
       renderers={{
         img: (htmlAttribs, children, convertedCSSStyles, passProps) => {
           const { src, alt } = htmlAttribs;
+          if (!src) return null;
           return (
             <Image
               source={{ uri: src }}
-              style={styles.embeddedImage}
+              style={tagsStyles.img}
               accessibilityLabel={alt}
             />
           );
@@ -106,57 +159,5 @@ const RichTextRenderer: React.FC<RichTextRendererProps> = ({
     />
   );
 };
-
-const styles = StyleSheet.create({
-  text: {
-    fontSize: 16,
-    color: "#333",
-  },
-  paragraph: {
-    fontSize: 16,
-    marginVertical: 8,
-    color: "#333",
-  },
-  heading1: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginVertical: 8,
-    color: "#000",
-  },
-  heading2: {
-    fontSize: 20,
-    fontWeight: "bold",
-    marginVertical: 8,
-    color: "#000",
-  },
-  ulList: {
-    marginVertical: 8,
-    paddingLeft: 16,
-  },
-  olList: {
-    marginVertical: 8,
-    paddingLeft: 16,
-  },
-  listItem: {
-    fontSize: 16,
-    color: "#333",
-  },
-  link: {
-    color: "blue",
-    textDecorationLine: "underline",
-  },
-  bold: {
-    fontWeight: "bold",
-  },
-  italic: {
-    fontStyle: "italic",
-  },
-  embeddedImage: {
-    width: "100%",
-    height: 200,
-    borderRadius: 8,
-    marginVertical: 8,
-  },
-});
 
 export default RichTextRenderer;

@@ -16,11 +16,11 @@ const CustomText: React.FC<CustomTextProps> = ({
   ...props
 }) => {
   const { fontSize } = useFontSize();
-  const { theme } = useTheme();
+  const { colors } = useTheme();
 
   return (
     <Text
-      style={[{ fontSize, color: theme === "dark" ? "#fff" : "#000" }, style]}
+      style={[{ fontSize, color: colors.text }, style]} // 테마 색상 및 글꼴 크기 적용
       {...props}
     >
       {children}

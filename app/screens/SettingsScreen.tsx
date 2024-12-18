@@ -1,13 +1,13 @@
 // app/screens/SettingsScreen.tsx
 
-import React, { useEffect, useState } from "react";
+import React from "react";
 import {
   View,
   TouchableOpacity,
   StyleSheet,
-  Button,
   Linking,
   ScrollView,
+  Alert,
 } from "react-native";
 import { useTranslation } from "react-i18next";
 import { useLanguage } from "../contexts/LanguageContext";
@@ -15,7 +15,7 @@ import { useTheme } from "../contexts/ThemeContext";
 import { useFontSize } from "../contexts/FontSizeContext";
 import Ionicons from "@expo/vector-icons/Ionicons"; // 아이콘 사용
 import CustomText from "../components/CustomText";
-import Constants from 'expo-constants'; // 앱 버전 정보 가져오기
+import Constants from "expo-constants"; // 앱 버전 정보 가져오기
 
 const SettingsScreen: React.FC = () => {
   const { t } = useTranslation();
@@ -50,11 +50,6 @@ const SettingsScreen: React.FC = () => {
     ).catch((err) => console.error("Failed to send feedback:", err));
   };
 
-  const logout = () => {
-    // 로그아웃 로직 구현 (예: 인증 상태 초기화)
-    alert("The logout function has not been implemented yet.");
-  };
-
   const openPrivacyPolicy = () => {
     Linking.openURL(
       "https://www.leckere-koreanische-rezepte.de/privacy-policy",
@@ -75,7 +70,8 @@ const SettingsScreen: React.FC = () => {
         {/* 언어 설정 섹션 */}
         <View style={styles.section}>
           <CustomText style={styles.sectionTitle}>
-            <Ionicons name="language-outline" size={20} color={colors.text} /> {t("language")}
+            <Ionicons name="language-outline" size={20} color={colors.text} />{" "}
+            {t("language")}
           </CustomText>
           <View style={styles.buttonContainer}>
             <TouchableOpacity
@@ -102,7 +98,12 @@ const SettingsScreen: React.FC = () => {
         {/* 테마 설정 섹션 */}
         <View style={styles.section}>
           <CustomText style={styles.sectionTitle}>
-            <Ionicons name="color-palette-outline" size={20} color={colors.text} /> {t("theme")}
+            <Ionicons
+              name="color-palette-outline"
+              size={20}
+              color={colors.text}
+            />{" "}
+            {t("theme")}
           </CustomText>
           <TouchableOpacity style={styles.button} onPress={toggleTheme}>
             <CustomText style={styles.buttonText}>
@@ -114,14 +115,21 @@ const SettingsScreen: React.FC = () => {
         {/* 글꼴 크기 조절 섹션 */}
         <View style={styles.section}>
           <CustomText style={styles.sectionTitle}>
-            <Ionicons name="text-outline" size={20} color={colors.text} /> {t("font_size")}
+            <Ionicons name="text-outline" size={20} color={colors.text} />{" "}
+            {t("font_size")}
           </CustomText>
           <View style={styles.fontSizeContainer}>
-            <TouchableOpacity style={styles.smallButton} onPress={decreaseFontSize}>
+            <TouchableOpacity
+              style={styles.smallButton}
+              onPress={decreaseFontSize}
+            >
               <Ionicons name="remove-outline" size={20} color="#fff" />
             </TouchableOpacity>
             <CustomText style={styles.fontSizeText}>{fontSize}px</CustomText>
-            <TouchableOpacity style={styles.smallButton} onPress={increaseFontSize}>
+            <TouchableOpacity
+              style={styles.smallButton}
+              onPress={increaseFontSize}
+            >
               <Ionicons name="add-outline" size={20} color="#fff" />
             </TouchableOpacity>
           </View>
@@ -130,27 +138,29 @@ const SettingsScreen: React.FC = () => {
         {/* 피드백 섹션 */}
         <View style={styles.section}>
           <CustomText style={styles.sectionTitle}>
-            <Ionicons name="chatbubble-ellipses-outline" size={20} color={colors.text} /> {t("feedback")}
+            <Ionicons
+              name="chatbubble-ellipses-outline"
+              size={20}
+              color={colors.text}
+            />{" "}
+            {t("feedback")}
           </CustomText>
           <TouchableOpacity style={styles.button} onPress={sendFeedback}>
-            <CustomText style={styles.buttonText}>{t("send_feedback")}</CustomText>
-          </TouchableOpacity>
-        </View>
-
-        {/* 계정 섹션 */}
-        <View style={styles.section}>
-          <CustomText style={styles.sectionTitle}>
-            <Ionicons name="person-outline" size={20} color={colors.text} /> {t("account")}
-          </CustomText>
-          <TouchableOpacity style={styles.button} onPress={logout}>
-            <CustomText style={styles.buttonText}>{t("logout")}</CustomText>
+            <CustomText style={styles.buttonText}>
+              {t("send_feedback")}
+            </CustomText>
           </TouchableOpacity>
         </View>
 
         {/* 개인정보 보호 정책 섹션 */}
         <View style={styles.section}>
           <CustomText style={styles.sectionTitle}>
-            <Ionicons name="lock-closed-outline" size={20} color={colors.text} /> {t("privacy_policy")}
+            <Ionicons
+              name="lock-closed-outline"
+              size={20}
+              color={colors.text}
+            />{" "}
+            {t("privacy_policy")}
           </CustomText>
           <TouchableOpacity style={styles.button} onPress={openPrivacyPolicy}>
             <CustomText style={styles.buttonText}>
@@ -162,7 +172,12 @@ const SettingsScreen: React.FC = () => {
         {/* 앱 정보 섹션 */}
         <View style={styles.section}>
           <CustomText style={styles.sectionTitle}>
-            <Ionicons name="information-circle-outline" size={20} color={colors.text} /> {t("app_info")}
+            <Ionicons
+              name="information-circle-outline"
+              size={20}
+              color={colors.text}
+            />{" "}
+            {t("app_info")}
           </CustomText>
           <TouchableOpacity style={styles.button} onPress={openWebsite}>
             <CustomText style={styles.buttonText}>
@@ -174,8 +189,26 @@ const SettingsScreen: React.FC = () => {
             {t("app_version")}: {appVersion}
           </CustomText>
         </View>
+
+        {/* 푸터 섹션 */}
+        <View style={styles.footer}>
+          <CustomText style={styles.footerText}>
+            © 2024 Hansik Young Recipes.{" "}
+            <TouchableOpacity onPress={openImpressum}>
+              <CustomText style={styles.footerLink}>Impressum</CustomText>
+            </TouchableOpacity>
+          </CustomText>
+        </View>
       </View>
     </ScrollView>
+  );
+};
+
+// Impressum 열기 함수
+const openImpressum = () => {
+  const impressumURL = "https://www.leckere-koreanische-rezepte.de/impressum";
+  Linking.openURL(impressumURL).catch((err) =>
+    console.error("Failed to open Impressum URL:", err),
   );
 };
 
@@ -254,6 +287,23 @@ const getStyles = (colors: any, fontSize: number) =>
       fontSize: 12,
       color: colors.secondary,
       textAlign: "center",
+    },
+    footer: {
+      marginTop: 20,
+      alignItems: "center",
+      paddingVertical: 10,
+      borderTopWidth: 1,
+      borderTopColor: "#ddd",
+    },
+    footerText: {
+      fontSize: 12,
+      color: "#555",
+    },
+    footerLink: {
+      fontSize: 12,
+      color: "#555",
+      textDecorationLine: "none",
+      fontWeight: "bold",
     },
   });
 

@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from "react";
 import {
   View,
-  Text,
   Image,
   ScrollView,
   ActivityIndicator,
@@ -20,6 +19,9 @@ import { RecipeEntry, RecipeIngredient, Ingredient } from "../types/Recipe";
 import { RootStackParamList } from "../navigation/types";
 import { getThumbnailFromEmbedUrl } from "../lib/getYouTubeThumbnail";
 import { useLanguage } from "../contexts/LanguageContext"; // LanguageContext 임포트
+import CustomText from "../components/CustomText"; // CustomText 임포트
+import { useTheme } from "../contexts/ThemeContext"; // ThemeContext 임포트
+import { useFontSize } from "../contexts/FontSizeContext"; // FontSizeContext 임포트
 
 type RecipeScreenRouteProp = RouteProp<RootStackParamList, "RecipeDetail">;
 type RecipeScreenNavigationProp = StackNavigationProp<
@@ -35,6 +37,8 @@ interface RecipeScreenProps {
 const RecipeScreen: React.FC<RecipeScreenProps> = ({ route, navigation }) => {
   const { recipeId } = route.params;
   const { language } = useLanguage(); // 현재 언어 가져오기
+  const { colors } = useTheme(); // ThemeContext에서 colors 가져오기
+  const { fontSize } = useFontSize(); // FontSizeContext에서 fontSize 가져오기
   const [recipe, setRecipe] = useState<RecipeEntry | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [thumbnail, setThumbnail] = useState<string | null>(null);
@@ -61,6 +65,9 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route, navigation }) => {
     fetchRecipe();
   }, [recipeId, language]); // 언어가 변경될 때마다 재페칭
 
+  // 스타일 생성은 컴포넌트 내부에서
+  const styles = getStyles(colors, fontSize);
+
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
@@ -72,7 +79,7 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route, navigation }) => {
   if (!recipe) {
     return (
       <View style={styles.container}>
-        <Text style={styles.notFoundText}>Recipe not found.</Text>
+        <CustomText style={styles.notFoundText}>Recipe not found.</CustomText>
       </View>
     );
   }
@@ -107,7 +114,9 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route, navigation }) => {
   // 모든 재료 표시 (이미지가 있는 재료에만 링크 걸기)
   const renderIngredients = () => {
     if (!ingredients || ingredients.length === 0) {
-      return <Text style={styles.text}>No ingredients available.</Text>;
+      return (
+        <CustomText style={styles.text}>No ingredients available.</CustomText>
+      );
     }
 
     return ingredients.map(
@@ -127,19 +136,20 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route, navigation }) => {
               <TouchableOpacity
                 onPress={() =>
                   navigation.navigate("IngredientDetail", {
-                    // 스크린 이름 수정
                     ingredientId: ingredientId,
                   })
                 }
               >
-                <Text style={styles.ingredientLink}>{name}</Text>
+                <CustomText style={styles.ingredientLink}>{name}</CustomText>
               </TouchableOpacity>
             ) : (
-              <Text style={styles.ingredientText}>{name}</Text>
+              <CustomText style={styles.ingredientText}>{name}</CustomText>
             )}
 
             {/* Quantity 표시 */}
-            <Text style={styles.ingredientQuantity}>{quantity}</Text>
+            <CustomText style={styles.ingredientQuantity}>
+              {quantity}
+            </CustomText>
           </View>
         );
       },
@@ -148,7 +158,7 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route, navigation }) => {
 
   return (
     <ScrollView
-      style={styles.container}
+      style={styles.scrollContainer}
       contentContainerStyle={styles.scrollContent}
     >
       {/* 이미지 렌더링 */}
@@ -162,46 +172,50 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route, navigation }) => {
       />
 
       {/* 제목 */}
-      <Text style={styles.title}>{titel || "Untitled"}</Text>
+      <CustomText style={styles.title}>{titel || "Untitled"}</CustomText>
 
       {/* 카테고리 */}
-      <Text style={styles.sectionHeader}>Category:</Text>
-      <Text style={styles.text}>{category || "No Category"}</Text>
+      <CustomText style={styles.sectionHeader}>Category:</CustomText>
+      <CustomText style={styles.text}>{category || "No Category"}</CustomText>
 
       {/* 준비 시간 */}
-      <Text style={styles.sectionHeader}>Preparation Time:</Text>
-      <Text style={styles.text}>
-        {preparationTime ? `${preparationTime} 분` : "N/A"}
-      </Text>
+      <CustomText style={styles.sectionHeader}>Preparation Time:</CustomText>
+      <CustomText style={styles.text}>
+        {preparationTime ? `${preparationTime} minutes` : "N/A"}
+      </CustomText>
 
       {/* 인분 */}
-      <Text style={styles.sectionHeader}>Servings:</Text>
-      <Text style={styles.text}>{servings ? `${servings} 인분` : "N/A"}</Text>
+      <CustomText style={styles.sectionHeader}>Servings:</CustomText>
+      <CustomText style={styles.text}>
+        {servings ? `${servings} servings` : "N/A"}
+      </CustomText>
 
       {/* 재료 */}
-      <Text style={styles.sectionHeader}>Ingredients:</Text>
+      <CustomText style={styles.sectionHeader}>Ingredients:</CustomText>
       <View style={styles.ingredientsContainer}>{renderIngredients()}</View>
 
       {/* 설명 */}
-      <Text style={styles.sectionHeader}>Description:</Text>
+      <CustomText style={styles.sectionHeader}>Description:</CustomText>
       {description ? (
         <RichTextRenderer content={description} />
       ) : (
-        <Text style={styles.text}>No Description Available</Text>
+        <CustomText style={styles.text}>No Description Available</CustomText>
       )}
 
       {/* 조리 방법 */}
-      <Text style={styles.sectionHeader}>Instructions:</Text>
+      <CustomText style={styles.sectionHeader}>Instructions:</CustomText>
       {instructions ? (
         <RichTextRenderer content={instructions} />
       ) : (
-        <Text style={styles.text}>No Instructions Available</Text>
+        <CustomText style={styles.text}>No Instructions Available</CustomText>
       )}
 
       {/* YouTube 썸네일 또는 비디오 링크 */}
       {youTubeUrl && (
         <View style={styles.youtubeContainer}>
-          <Text style={styles.sectionHeader}>Video for reference:</Text>
+          <CustomText style={styles.sectionHeader}>
+            Video for reference:
+          </CustomText>
           {thumbnail ? (
             <TouchableOpacity onPress={() => Linking.openURL(youTubeUrl)}>
               <Image
@@ -213,12 +227,12 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route, navigation }) => {
                 }
               />
               <View style={styles.playButton}>
-                <Text style={styles.playButtonText}>▶</Text>
+                <CustomText style={styles.playButtonText}>▶</CustomText>
               </View>
             </TouchableOpacity>
           ) : (
             <TouchableOpacity onPress={() => Linking.openURL(youTubeUrl)}>
-              <Text style={styles.link}>{youTubeUrl}</Text>
+              <CustomText style={styles.link}>{youTubeUrl}</CustomText>
             </TouchableOpacity>
           )}
         </View>
@@ -227,13 +241,17 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route, navigation }) => {
       {/* 비디오 파일 */}
       {videoFile && (
         <View style={styles.videoContainer}>
-          <Text style={styles.sectionHeader}>Video for reference:</Text>
+          <CustomText style={styles.sectionHeader}>
+            Video for reference:
+          </CustomText>
           <TouchableOpacity
             onPress={() =>
               Linking.openURL(`https:${videoFile.fields.file.url}`)
             }
           >
-            <Text style={styles.link}>{videoFile.fields.file.url}</Text>
+            <CustomText style={styles.link}>
+              {videoFile.fields.file.url}
+            </CustomText>
           </TouchableOpacity>
         </View>
       )}
@@ -241,99 +259,102 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route, navigation }) => {
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    padding: 20,
-    backgroundColor: "#fff",
-    flex: 1, // ScrollView가 전체 화면을 차지하도록 설정
-  },
-  scrollContent: {
-    paddingBottom: 20,
-    flexGrow: 1,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  notFoundText: {
-    fontSize: 18,
-    color: "#ff0000",
-    textAlign: "center",
-  },
-  image: {
-    width: "100%",
-    height: 200,
-    borderRadius: 8,
-    marginBottom: 10,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginVertical: 10,
-    color: "#000",
-  },
-  sectionHeader: {
-    marginTop: 20,
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#000",
-  },
-  text: {
-    fontSize: 16,
-    color: "#333",
-    marginTop: 5,
-  },
-  ingredientsContainer: {
-    marginTop: 10,
-  },
-  ingredientItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 10,
-  },
-  ingredientQuantity: {
-    fontSize: 16,
-    color: "#555",
-    marginLeft: 10, // 재료 이름과 양 사이 간격 조정
-  },
-  ingredientLink: {
-    fontSize: 16,
-    color: "blue",
-    textDecorationLine: "underline",
-  },
-  ingredientText: {
-    fontSize: 16,
-    color: "#333",
-  },
-  youtubeContainer: {
-    marginTop: 20,
-    alignItems: "center",
-  },
-  youtubeImage: {
-    width: Dimensions.get("window").width - 40,
-    height: ((Dimensions.get("window").width - 40) * 9) / 16, // 16:9 비율 유지
-    borderRadius: 8,
-  },
-  playButton: {
-    position: "absolute",
-    top: "40%",
-    left: "45%",
-    backgroundColor: "rgba(0,0,0,0.6)",
-    borderRadius: 25,
-    padding: 10,
-  },
-  playButtonText: {
-    color: "#fff",
-    fontSize: 20,
-  },
-  videoContainer: {
-    marginTop: 20,
-  },
-  link: {
-    color: "blue",
-    textDecorationLine: "underline",
-  },
-});
+// 테마와 글꼴 크기에 따라 동적으로 스타일 생성
+const getStyles = (colors: any, fontSize: number) =>
+  StyleSheet.create({
+    scrollContainer: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+    container: {
+      flex: 1,
+      padding: 20,
+    },
+    title: {
+      fontWeight: "bold",
+      marginVertical: 10,
+      color: colors.text,
+      fontSize: fontSize + 4,
+      textAlign: "center",
+    },
+    notFoundText: {
+      fontSize: fontSize,
+      color: "#ff0000",
+      textAlign: "center",
+    },
+    sectionHeader: {
+      marginTop: 20,
+      fontSize: fontSize + 2,
+      fontWeight: "bold",
+      color: colors.text,
+    },
+    text: {
+      fontSize: fontSize,
+      color: colors.text,
+      marginTop: 5,
+    },
+    ingredientsContainer: {
+      marginTop: 10,
+    },
+    ingredientItem: {
+      flexDirection: "row",
+      alignItems: "center",
+      marginBottom: 10,
+    },
+    ingredientQuantity: {
+      fontSize: fontSize,
+      color: "#555",
+      marginLeft: 10, // 재료 이름과 양 사이 간격 조정
+    },
+    ingredientLink: {
+      fontSize: fontSize,
+      color: "blue",
+      textDecorationLine: "underline",
+    },
+    ingredientText: {
+      fontSize: fontSize,
+      color: colors.text,
+    },
+    youtubeContainer: {
+      marginTop: 20,
+      alignItems: "center",
+    },
+    youtubeImage: {
+      width: Dimensions.get("window").width - 40,
+      height: ((Dimensions.get("window").width - 40) * 9) / 16, // 16:9 비율 유지
+      borderRadius: 8,
+    },
+    playButton: {
+      position: "absolute",
+      top: "40%",
+      left: "45%",
+      backgroundColor: "rgba(0,0,0,0.6)",
+      borderRadius: 25,
+      padding: 10,
+    },
+    playButtonText: {
+      color: "#fff",
+      fontSize: 20,
+    },
+    videoContainer: {
+      marginTop: 20,
+    },
+    link: {
+      color: "blue",
+      textDecorationLine: "underline",
+      fontSize: fontSize,
+    },
+    image: {
+      width: "100%",
+      height: 200,
+      borderRadius: 8,
+      marginBottom: 10,
+    },
+    loadingContainer: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+  });
 
 export default RecipeScreen;
