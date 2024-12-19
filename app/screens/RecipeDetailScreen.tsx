@@ -139,6 +139,7 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route, navigation }) => {
                     ingredientId: ingredientId,
                   })
                 }
+                style={{ flex: 1, flexShrink: 1 }}
               >
                 <CustomText style={styles.ingredientLink}>{name}</CustomText>
               </TouchableOpacity>
@@ -292,28 +293,36 @@ const getStyles = (colors: any, fontSize: number) =>
       fontSize: fontSize,
       color: colors.text,
       marginTop: 5,
+      flexShrink: 1, // 텍스트가 컨테이너를 넘지 않도록 설정
     },
     ingredientsContainer: {
       marginTop: 10,
     },
     ingredientItem: {
       flexDirection: "row",
-      alignItems: "center",
+      alignItems: "flex-start",
       marginBottom: 10,
+      flexWrap: "wrap",
     },
     ingredientQuantity: {
       fontSize: fontSize,
       color: "#555",
-      marginLeft: 10, // 재료 이름과 양 사이 간격 조정
+      marginLeft: 10,
+      flex: 1,
+      flexShrink: 1,
     },
     ingredientLink: {
       fontSize: fontSize,
       color: "blue",
       textDecorationLine: "underline",
+      flex: 1,
+      flexShrink: 1,
     },
     ingredientText: {
       fontSize: fontSize,
       color: colors.text,
+      flex: 1,
+      flexShrink: 1,
     },
     youtubeContainer: {
       marginTop: 20,
