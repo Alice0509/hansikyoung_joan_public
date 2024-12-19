@@ -50,6 +50,7 @@ export default ({ config }) => ({
           },
         },
       },
+      ITSAppUsesNonExemptEncryption: false,
     },
     android: {
       package: "com.joan.hansikyoungrecipes",

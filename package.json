@@ -17,7 +17,7 @@
     "axios": "^1.7.9",
     "contentful": "^11.3.1",
     "dotenv": "^16.4.7",
-    "expo": "~52.0.18",
+    "expo": "~52.0.20",
     "expo-constants": "^17.0.3",
     "expo-dev-client": "^5.0.6",
     "expo-font": "^13.0.1",
@@ -37,7 +37,7 @@
     "react-native-get-random-values": "^1.11.0",
     "react-native-reanimated": "~3.16.1",
     "react-native-render-html": "^6.3.4",
-    "react-native-safe-area-context": "^4.14.1",
+    "react-native-safe-area-context": "4.12.0",
     "react-native-screens": "~4.1.0",
     "react-native-svg": "15.8.0",
     "react-native-vector-icons": "^10.2.0",
@@ -71,6 +71,7 @@
   "expo": {
     "doctor": {
       "reactNativeDirectoryCheck": {
+        "listUnknownPackages": false,
         "exclude": [
           "@expo/metro-config",
           "@expo/prebuild-config",
