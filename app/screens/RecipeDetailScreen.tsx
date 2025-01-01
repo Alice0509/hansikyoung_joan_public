@@ -10,18 +10,28 @@ import {
   Linking,
   TouchableOpacity,
   Dimensions,
+  Alert,
 } from "react-native";
 import { RouteProp } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { getRecipeById } from "../lib/contentful";
 import RichTextRenderer from "../components/RichTextRenderer";
-import { RecipeEntry, RecipeIngredient, Ingredient } from "../types/Recipe";
+import {
+  RecipeEntry,
+  RecipeIngredient,
+  Ingredient,
+  RecipeStep,
+} from "../types/Recipe";
 import { RootStackParamList } from "../navigation/types";
 import { getThumbnailFromEmbedUrl } from "../lib/getYouTubeThumbnail";
-import { useLanguage } from "../contexts/LanguageContext"; // LanguageContext 임포트
-import CustomText from "../components/CustomText"; // CustomText 임포트
-import { useTheme } from "../contexts/ThemeContext"; // ThemeContext 임포트
-import { useFontSize } from "../contexts/FontSizeContext"; // FontSizeContext 임포트
+import { useLanguage } from "../contexts/LanguageContext";
+import CustomText from "../components/CustomText";
+import { useTheme } from "../contexts/ThemeContext";
+import { useFontSize } from "../contexts/FontSizeContext";
+import StepByStepGuide from "../components/StepByStepGuide";
+import IngredientsChecklist from "../components/IngredientsChecklist";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { normalizeRichText } from "../utils/normalizeRichText"; // 변환 함수 임포트
 
 type RecipeScreenRouteProp = RouteProp<RootStackParamList, "RecipeDetail">;
 type RecipeScreenNavigationProp = StackNavigationProp<
@@ -36,25 +46,100 @@ interface RecipeScreenProps {
 
 const RecipeScreen: React.FC<RecipeScreenProps> = ({ route, navigation }) => {
   const { recipeId } = route.params;
-  const { language } = useLanguage(); // 현재 언어 가져오기
-  const { colors } = useTheme(); // ThemeContext에서 colors 가져오기
-  const { fontSize } = useFontSize(); // FontSizeContext에서 fontSize 가져오기
+  const { language } = useLanguage();
+  const { colors } = useTheme();
+  const { fontSize } = useFontSize();
   const [recipe, setRecipe] = useState<RecipeEntry | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [thumbnail, setThumbnail] = useState<string | null>(null);
 
+  // Ingredients 체크 상태 관리
+  const [checkedIngredients, setCheckedIngredients] = useState<boolean[]>([]);
+
   useEffect(() => {
     const fetchRecipe = async () => {
       try {
-        const data = await getRecipeById(recipeId, language); // 언어 적용
-        setRecipe(data);
+        const data = await getRecipeById(recipeId, language);
+        console.log("Fetched Recipe Data:", JSON.stringify(data, null, 2));
 
-        if (data.fields.youTubeUrl) {
-          const thumb = getThumbnailFromEmbedUrl(data.fields.youTubeUrl);
+        // Rich Text 필드 표준화
+        const normalizedFields = { ...data.fields };
+        ["titel", "description", "instructions"].forEach((field) => {
+          if (
+            data.fields[field] &&
+            (data.fields[field] as any).nodeType === "document"
+          ) {
+            normalizedFields[field] = normalizeRichText(
+              data.fields[field] as Document,
+            );
+            console.log(
+              `Normalized ${field}:`,
+              JSON.stringify(normalizedFields[field], null, 2),
+            );
+          } else if (typeof data.fields[field] === "string") {
+            normalizedFields[field] = data.fields[field];
+            console.log(`Field ${field} is a string and was not normalized.`);
+          } else {
+            console.warn(`Field ${field} is neither a Document nor a string.`);
+          }
+        });
+
+        // Steps 필드 처리
+        if (data.fields.steps && Array.isArray(data.fields.steps)) {
+          normalizedFields.steps = data.fields.steps.map((step: any) => ({
+            ...step,
+            fields: {
+              ...step.fields,
+              description:
+                step.fields.description &&
+                (step.fields.description as any).nodeType === "document"
+                  ? normalizeRichText(step.fields.description as Document)
+                  : step.fields.description, // 문자열인 경우 그대로 사용
+              timerDuration: step.fields.timerDuration || undefined, // timerDuration 필드 추가
+            },
+          }));
+          console.log(
+            "Normalized Steps:",
+            JSON.stringify(normalizedFields.steps, null, 2),
+          );
+        } else {
+          normalizedFields.steps = []; // steps가 없거나 배열이 아닐 경우 빈 배열 할당
+          console.warn("Steps is not an array or is undefined.");
+        }
+
+        setRecipe({ ...data, fields: normalizedFields });
+
+        if (normalizedFields.youTubeUrl) {
+          const thumb = getThumbnailFromEmbedUrl(normalizedFields.youTubeUrl);
           setThumbnail(thumb);
         }
 
-        console.log("Fetched Recipe:", data); // 데이터 확인
+        // Ingredients 체크 상태 초기화 또는 불러오기
+        if (normalizedFields.ingredients) {
+          const storedChecked = await AsyncStorage.getItem(
+            `checkedIngredients_${recipeId}`,
+          );
+          if (storedChecked) {
+            setCheckedIngredients(JSON.parse(storedChecked));
+          } else {
+            setCheckedIngredients(
+              new Array(normalizedFields.ingredients.length).fill(false),
+            );
+          }
+        }
+
+        // 디버깅을 위한 콘솔 로그 추가
+        console.log("Fetched Recipe Steps:", normalizedFields.steps);
+        console.log("Normalized Description:", normalizedFields.description);
+        console.log("Normalized Instructions:", normalizedFields.instructions);
+        if (normalizedFields.steps && Array.isArray(normalizedFields.steps)) {
+          normalizedFields.steps.forEach((step: any, index: number) => {
+            console.log(
+              `Normalized Step ${index + 1}:`,
+              JSON.stringify(step.fields.description, null, 2),
+            );
+          });
+        }
       } catch (error) {
         console.error("Error fetching recipe details:", error);
       } finally {
@@ -63,15 +148,57 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route, navigation }) => {
     };
 
     fetchRecipe();
-  }, [recipeId, language]); // 언어가 변경될 때마다 재페칭
+  }, [recipeId, language]);
 
-  // 스타일 생성은 컴포넌트 내부에서
+  // 체크 상태 변경 시 저장
+  const handleToggleCheck = async (index: number) => {
+    const newChecked = [...checkedIngredients];
+    newChecked[index] = !newChecked[index];
+    setCheckedIngredients(newChecked);
+    await AsyncStorage.setItem(
+      `checkedIngredients_${recipeId}`,
+      JSON.stringify(newChecked),
+    );
+  };
+
+  // "Clear All" 버튼 핸들러
+  const handleClearAll = async () => {
+    if (recipe?.fields.ingredients && recipe.fields.ingredients.length > 0) {
+      Alert.alert(
+        "Confirm Clear",
+        "Are you sure you want to clear all ingredients?",
+        [
+          {
+            text: "Cancel",
+            style: "cancel",
+          },
+          {
+            text: "Clear All",
+            style: "destructive",
+            onPress: async () => {
+              const cleared = new Array(recipe.fields.ingredients.length).fill(
+                false,
+              );
+              setCheckedIngredients(cleared);
+              await AsyncStorage.setItem(
+                `checkedIngredients_${recipeId}`,
+                JSON.stringify(cleared),
+              );
+            },
+          },
+        ],
+        { cancelable: true },
+      );
+    }
+  };
+
+  // styles 객체 정의
   const styles = getStyles(colors, fontSize);
 
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#007AFF" />
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
@@ -79,13 +206,15 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route, navigation }) => {
   if (!recipe) {
     return (
       <View style={styles.container}>
-        <CustomText style={styles.notFoundText}>Recipe not found.</CustomText>
+        <CustomText style={[styles.notFoundText, { color: colors.text }]}>
+          Recipe not found.
+        </CustomText>
       </View>
     );
   }
 
   const {
-    titel,
+    titel, // 'title'에서 'titel'로 수정
     description,
     image,
     category,
@@ -93,9 +222,16 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route, navigation }) => {
     servings,
     ingredients,
     instructions,
+    steps, // 단계별 조리 과정
     videoFile,
     youTubeUrl,
   } = recipe.fields;
+
+  // 디버깅을 위한 콘솔 로그 추가
+  console.log("Titel:", titel, typeof titel);
+  console.log("Description:", description, typeof description);
+  console.log("Instructions:", instructions, typeof instructions);
+  console.log("Steps:", steps, Array.isArray(steps));
 
   // 이미지 URL 설정: Contentful 이미지 > YouTube 썸네일 > 기본 이미지
   let displayImageSource;
@@ -111,56 +247,52 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route, navigation }) => {
     console.log("Displaying Default Image");
   }
 
-  // 모든 재료 표시 (이미지가 있는 재료에만 링크 걸기)
-  const renderIngredients = () => {
-    if (!ingredients || ingredients.length === 0) {
-      return (
-        <CustomText style={styles.text}>No ingredients available.</CustomText>
-      );
-    }
+  // 재료 데이터를 `Ingredient` 형태로 매핑
+  const mappedIngredients: Ingredient[] = ingredients.map(
+    (ri: RecipeIngredient) => ({
+      name: ri.fields.ingredient.fields.name,
+      quantity: ri.fields.quantity || "",
+      id: ri.fields.ingredient.sys.id,
+      image: ri.fields.ingredient.fields.bild
+        ? `https:${ri.fields.ingredient.fields.bild.fields.file.url}`
+        : undefined,
+    }),
+  );
 
-    return ingredients.map(
-      (recipeIngredient: RecipeIngredient, index: number) => {
-        const ingredient = recipeIngredient.fields.ingredient as Ingredient;
-        const { name, bild } = ingredient.fields;
-        const quantity = recipeIngredient.fields.quantity || "";
+  // 디버깅을 위한 콘솔 로그 추가
+  console.log("Mapped Ingredients:", mappedIngredients);
 
-        // 이미지 존재 여부 확인
-        const hasImage = !!bild;
-        const ingredientId = ingredient.sys.id;
+  // 단계별 조리 과정 데이터 확인
+  console.log("Mapped Steps Before Mapping:", steps);
 
-        return (
-          <View key={recipeIngredient.sys.id} style={styles.ingredientItem}>
-            {/* 재료 이름 표시 (이미지가 있을 경우 네비게이션 링크 걸기) */}
-            {hasImage ? (
-              <TouchableOpacity
-                onPress={() =>
-                  navigation.navigate("IngredientDetail", {
-                    ingredientId: ingredientId,
-                  })
-                }
-                style={{ flex: 1, flexShrink: 1 }}
-              >
-                <CustomText style={styles.ingredientLink}>{name}</CustomText>
-              </TouchableOpacity>
-            ) : (
-              <CustomText style={styles.ingredientText}>{name}</CustomText>
-            )}
+  // 단계별 조리 과정 데이터 매핑
+  let mappedSteps: RecipeStep[] = [];
+  if (steps && Array.isArray(steps)) {
+    mappedSteps = steps.map((step: any, index: number) => ({
+      stepNumber:
+        step.fields.stepNumber !== undefined
+          ? step.fields.stepNumber
+          : index + 1,
+      description: step.fields.description, // 이미 normalizeRichText로 처리됨
+      image:
+        step.fields.image && step.fields.image.length > 0
+          ? `https:${step.fields.image[0].fields.file.url}`
+          : undefined,
+      timerDuration: step.fields.timerDuration || undefined, // timerDuration 필드 매핑
+    }));
+  } else {
+    mappedSteps = []; // 명시적으로 빈 배열 할당
+    console.warn("Steps is not an array or is undefined.");
+  }
 
-            {/* Quantity 표시 */}
-            <CustomText style={styles.ingredientQuantity}>
-              {quantity}
-            </CustomText>
-          </View>
-        );
-      },
-    );
-  };
+  // 디버깅을 위한 콘솔 로그 추가
+  console.log("Mapped Steps After Mapping:", mappedSteps);
 
   return (
     <ScrollView
       style={styles.scrollContainer}
       contentContainerStyle={styles.scrollContent}
+      keyboardShouldPersistTaps="handled"
     >
       {/* 이미지 렌더링 */}
       <Image
@@ -173,48 +305,135 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route, navigation }) => {
       />
 
       {/* 제목 */}
-      <CustomText style={styles.title}>{titel || "Untitled"}</CustomText>
+      {typeof titel === "string" ? (
+        <CustomText style={[styles.title, { color: colors.text }]}>
+          {titel}
+        </CustomText>
+      ) : (
+        <RichTextRenderer
+          content={titel}
+          style={{
+            fontSize: fontSize + 4,
+            color: colors.text,
+            textAlign: "center",
+            marginVertical: 10,
+          }}
+        />
+      )}
 
       {/* 카테고리 */}
-      <CustomText style={styles.sectionHeader}>Category:</CustomText>
-      <CustomText style={styles.text}>{category || "No Category"}</CustomText>
+      <CustomText style={[styles.sectionHeader, { color: colors.text }]}>
+        Category:
+      </CustomText>
+      <CustomText style={[styles.text, { color: colors.text }]}>
+        {category || "No Category"}
+      </CustomText>
 
       {/* 준비 시간 */}
-      <CustomText style={styles.sectionHeader}>Preparation Time:</CustomText>
-      <CustomText style={styles.text}>
+      <CustomText style={[styles.sectionHeader, { color: colors.text }]}>
+        Preparation Time:
+      </CustomText>
+      <CustomText style={[styles.text, { color: colors.text }]}>
         {preparationTime ? `${preparationTime} minutes` : "N/A"}
       </CustomText>
 
       {/* 인분 */}
-      <CustomText style={styles.sectionHeader}>Servings:</CustomText>
-      <CustomText style={styles.text}>
+      <CustomText style={[styles.sectionHeader, { color: colors.text }]}>
+        Servings:
+      </CustomText>
+      <CustomText style={[styles.text, { color: colors.text }]}>
         {servings ? `${servings} servings` : "N/A"}
       </CustomText>
 
       {/* 재료 */}
-      <CustomText style={styles.sectionHeader}>Ingredients:</CustomText>
-      <View style={styles.ingredientsContainer}>{renderIngredients()}</View>
+      <CustomText style={[styles.sectionHeader, { color: colors.text }]}>
+        Ingredients:
+      </CustomText>
+      <View style={styles.ingredientsContainer}>
+        <IngredientsChecklist
+          ingredients={mappedIngredients}
+          checkedIngredients={checkedIngredients}
+          onToggleCheck={handleToggleCheck}
+          colors={{
+            text: colors.text,
+            linkText: colors.linkText,
+            linkedRowBackground: colors.linkedRowBackground,
+            tableHeaderBackground: colors.tableHeaderBackground, // 테이블 헤더 배경색 전달
+          }}
+          fontSize={fontSize}
+        />
+        {checkedIngredients.some(Boolean) && (
+          <TouchableOpacity
+            style={styles.clearAllButton}
+            onPress={handleClearAll}
+          >
+            <CustomText
+              style={[styles.clearAllText, { color: colors.buttonText }]}
+            >
+              Clear All
+            </CustomText>
+          </TouchableOpacity>
+        )}
+      </View>
 
       {/* 설명 */}
-      <CustomText style={styles.sectionHeader}>Description:</CustomText>
+      <CustomText style={[styles.sectionHeader, { color: colors.text }]}>
+        Description:
+      </CustomText>
       {description ? (
-        <RichTextRenderer content={description} />
+        <RichTextRenderer
+          content={description}
+          style={{ fontSize: fontSize, color: colors.text }}
+        />
       ) : (
-        <CustomText style={styles.text}>No Description Available</CustomText>
+        <CustomText style={[styles.description, { color: colors.text }]}>
+          No Description Available
+        </CustomText>
       )}
 
       {/* 조리 방법 */}
-      <CustomText style={styles.sectionHeader}>Instructions:</CustomText>
+      <CustomText style={[styles.sectionHeader, { color: colors.text }]}>
+        Instructions:
+      </CustomText>
       {instructions ? (
-        <RichTextRenderer content={instructions} />
+        <RichTextRenderer
+          content={instructions}
+          style={{ fontSize: fontSize, color: colors.text }}
+        />
       ) : (
-        <CustomText style={styles.text}>No Instructions Available</CustomText>
+        <CustomText style={[styles.text, { color: colors.text }]}>
+          No Instructions Available
+        </CustomText>
+      )}
+
+      {/* 단계별 조리 과정 */}
+      {mappedSteps.length > 0 ? (
+        <View style={[styles.section, styles.stepSection]}>
+          <CustomText style={[styles.sectionHeader, { color: colors.text }]}>
+            Step-by-Step Guide:
+          </CustomText>
+          <StepByStepGuide
+            steps={mappedSteps}
+            colors={{
+              text: colors.text,
+              primary: colors.primary,
+              buttonText: colors.buttonText,
+              stepBackground: colors.stepBackground,
+              currentStepBorder: colors.currentStepBorder,
+            }}
+            fontSize={fontSize}
+          />
+        </View>
+      ) : (
+        <CustomText style={[styles.text, { color: colors.text }]}>
+          No Steps Available
+        </CustomText>
       )}
 
       {/* YouTube 썸네일 또는 비디오 링크 */}
       {youTubeUrl && (
         <View style={styles.youtubeContainer}>
-          <CustomText style={styles.sectionHeader}>
+          <CustomText style={[styles.sectionHeader, { color: colors.text }]}>
             Video for reference:
           </CustomText>
           {thumbnail ? (
@@ -228,12 +447,18 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route, navigation }) => {
                 }
               />
               <View style={styles.playButton}>
-                <CustomText style={styles.playButtonText}>▶</CustomText>
+                <CustomText
+                  style={[styles.playButtonText, { color: colors.buttonText }]}
+                >
+                  ▶
+                </CustomText>
               </View>
             </TouchableOpacity>
           ) : (
             <TouchableOpacity onPress={() => Linking.openURL(youTubeUrl)}>
-              <CustomText style={styles.link}>{youTubeUrl}</CustomText>
+              <CustomText style={[styles.link, { color: colors.primary }]}>
+                {youTubeUrl}
+              </CustomText>
             </TouchableOpacity>
           )}
         </View>
@@ -242,7 +467,7 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route, navigation }) => {
       {/* 비디오 파일 */}
       {videoFile && (
         <View style={styles.videoContainer}>
-          <CustomText style={styles.sectionHeader}>
+          <CustomText style={[styles.sectionHeader, { color: colors.text }]}>
             Video for reference:
           </CustomText>
           <TouchableOpacity
@@ -250,7 +475,7 @@ const RecipeScreen: React.FC<RecipeScreenProps> = ({ route, navigation }) => {
               Linking.openURL(`https:${videoFile.fields.file.url}`)
             }
           >
-            <CustomText style={styles.link}>
+            <CustomText style={[styles.link, { color: colors.primary }]}>
               {videoFile.fields.file.url}
             </CustomText>
           </TouchableOpacity>
@@ -267,20 +492,24 @@ const getStyles = (colors: any, fontSize: number) =>
       flex: 1,
       backgroundColor: colors.background,
     },
+    scrollContent: {
+      padding: 20,
+    },
     container: {
       flex: 1,
       padding: 20,
+      backgroundColor: colors.background, // 배경 색상 적용
     },
     title: {
       fontWeight: "bold",
       marginVertical: 10,
-      color: colors.text,
+      color: colors.text, // 이미 style prop으로 전달됨
       fontSize: fontSize + 4,
       textAlign: "center",
     },
     notFoundText: {
       fontSize: fontSize,
-      color: "#ff0000",
+      color: "#ff0000", // 에러 텍스트는 고정 색상 사용
       textAlign: "center",
     },
     sectionHeader: {
@@ -293,36 +522,13 @@ const getStyles = (colors: any, fontSize: number) =>
       fontSize: fontSize,
       color: colors.text,
       marginTop: 5,
-      flexShrink: 1, // 텍스트가 컨테이너를 넘지 않도록 설정
+      flexShrink: 1,
     },
     ingredientsContainer: {
       marginTop: 10,
     },
-    ingredientItem: {
-      flexDirection: "row",
-      alignItems: "flex-start",
-      marginBottom: 10,
-      flexWrap: "wrap",
-    },
-    ingredientQuantity: {
-      fontSize: fontSize,
-      color: "#555",
-      marginLeft: 10,
-      flex: 1,
-      flexShrink: 1,
-    },
-    ingredientLink: {
-      fontSize: fontSize,
-      color: "blue",
-      textDecorationLine: "underline",
-      flex: 1,
-      flexShrink: 1,
-    },
-    ingredientText: {
-      fontSize: fontSize,
-      color: colors.text,
-      flex: 1,
-      flexShrink: 1,
+    videoContainer: {
+      marginTop: 20,
     },
     youtubeContainer: {
       marginTop: 20,
@@ -345,11 +551,8 @@ const getStyles = (colors: any, fontSize: number) =>
       color: "#fff",
       fontSize: 20,
     },
-    videoContainer: {
-      marginTop: 20,
-    },
     link: {
-      color: "blue",
+      color: colors.primary, // 링크 색상 테마에 맞게 조정
       textDecorationLine: "underline",
       fontSize: fontSize,
     },
@@ -363,6 +566,36 @@ const getStyles = (colors: any, fontSize: number) =>
       flex: 1,
       justifyContent: "center",
       alignItems: "center",
+      backgroundColor: colors.background,
+    },
+    section: {
+      marginTop: 20,
+    },
+    stepSection: {
+      backgroundColor: colors.stepSectionBackground, // 테마에 따라 변경
+      padding: 10, // 필요에 따라 패딩 조정
+      borderRadius: 8,
+      marginTop: 20,
+    },
+    clearAllButton: {
+      marginTop: 10,
+      padding: 10,
+      backgroundColor: colors.activeButtonBackground, // 버튼 배경 색상 테마에 맞게 조정
+      borderRadius: 5,
+      alignItems: "center",
+    },
+    clearAllText: {
+      color: colors.buttonText,
+      fontSize: fontSize,
+    },
+    stepsContainer: {
+      marginTop: 20,
+      alignSelf: "stretch",
+    },
+    description: {
+      fontSize: fontSize,
+      color: colors.text,
+      marginTop: 5,
     },
   });
 

@@ -17,7 +17,7 @@
     "isolatedModules": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["app", "types", "index.ts"],
+  "include": ["app", "types", "index.ts", "env.d.ts"],
   "exclude": [
     "node_modules",
     "babel.config.js",

@@ -2,34 +2,56 @@
 
 import React, { createContext, useContext, useState, ReactNode } from "react";
 
-type Theme = "light" | "dark";
-
-interface ThemeContextProps {
-  theme: Theme;
-  toggleTheme: () => void;
-  colors: {
-    background: string;
-    text: string;
-    primary: string;
-    secondary: string;
-    buttonBackground: string;
-    buttonText: string;
-    activeButtonBackground: string;
-  };
+interface ThemeColors {
+  background: string;
+  text: string;
+  primary: string;
+  secondary: string;
+  buttonBackground: string;
+  buttonText: string;
+  activeButtonBackground: string;
+  linkText: string;
+  linkedRowBackground: string;
+  stepSectionBackground: string;
+  stepBackground: string;
+  currentStepBorder: string;
+  tableHeaderBackground: string; // 테이블 헤더 배경색 추가
 }
 
-const ThemeContext = createContext<ThemeContextProps | undefined>(undefined);
+interface ThemeContextProps {
+  theme: "light" | "dark";
+  colors: ThemeColors;
+  toggleTheme: () => void;
+}
+
+const ThemeContext = createContext<ThemeContextProps>({
+  theme: "light",
+  colors: {
+    background: "#f5f5f5",
+    text: "#000",
+    primary: "#007AFF",
+    secondary: "#34C759",
+    buttonBackground: "#007AFF",
+    buttonText: "#fff",
+    activeButtonBackground: "#005BBB",
+    linkText: "#007AFF",
+    linkedRowBackground: "#e6f7ff",
+    stepSectionBackground: "#fff",
+    stepBackground: "#f9f9f9",
+    currentStepBorder: "#007AFF",
+    tableHeaderBackground: "#e6f7ff", // 라이트 모드 테이블 헤더 배경색
+  },
+  toggleTheme: () => {},
+});
+
+export const useTheme = () => useContext(ThemeContext);
 
 export const ThemeProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
-  const [theme, setTheme] = useState<Theme>("light");
+  const [theme, setTheme] = useState<"light" | "dark">("light");
 
-  const toggleTheme = () => {
-    setTheme((prev) => (prev === "light" ? "dark" : "light"));
-  };
-
-  const colors =
+  const colors: ThemeColors =
     theme === "light"
       ? {
           background: "#f5f5f5",
@@ -39,6 +61,12 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({
           buttonBackground: "#007AFF",
           buttonText: "#fff",
           activeButtonBackground: "#005BBB",
+          linkText: "#007AFF",
+          linkedRowBackground: "#e6f7ff",
+          stepSectionBackground: "#fff",
+          stepBackground: "#f9f9f9",
+          currentStepBorder: "#007AFF",
+          tableHeaderBackground: "#e6f7ff", // 라이트 모드 테이블 헤더 배경색
         }
       : {
           background: "#121212",
@@ -48,19 +76,21 @@ export const ThemeProvider: React.FC<{ children: ReactNode }> = ({
           buttonBackground: "#0A84FF",
           buttonText: "#fff",
           activeButtonBackground: "#005BBB",
+          linkText: "#0A84FF",
+          linkedRowBackground: "#1e1e1e",
+          stepSectionBackground: "#1e1e1e",
+          stepBackground: "#1e1e1e",
+          currentStepBorder: "#0A84FF",
+          tableHeaderBackground: "#2c2c2c", // 다크 모드 테이블 헤더 배경색
         };
 
+  const toggleTheme = () => {
+    setTheme((prev) => (prev === "light" ? "dark" : "light"));
+  };
+
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme, colors }}>
+    <ThemeContext.Provider value={{ theme, colors, toggleTheme }}>
       {children}
     </ThemeContext.Provider>
   );
-};
-
-export const useTheme = (): ThemeContextProps => {
-  const context = useContext(ThemeContext);
-  if (!context) {
-    throw new Error("useTheme must be used within a ThemeProvider");
-  }
-  return context;
 };

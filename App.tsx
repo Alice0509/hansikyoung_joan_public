@@ -1,27 +1,30 @@
-// app/App.tsx
+// App.tsx
 
 import React from "react";
 import { SafeAreaView, StyleSheet } from "react-native";
 import MainNavigator from "./app/navigation/MainNavigator";
 import { FavoritesProvider } from "./app/contexts/FavoritesContext";
 import { SearchProvider } from "./app/contexts/SearchContext";
-import { LanguageProvider } from "./app/contexts/LanguageContext"; // LanguageProvider 임포트
-import { ThemeProvider, useTheme } from "./app/contexts/ThemeContext"; // ThemeProvider 추가
-import { FontSizeProvider } from "./app/contexts/FontSizeContext"; // FontSizeProvider 추가
+import { LanguageProvider } from "./app/contexts/LanguageContext";
+import { ThemeProvider, useTheme } from "./app/contexts/ThemeContext"; // useTheme import
+import { FontSizeProvider } from "./app/contexts/FontSizeContext";
+import { IngredientsProvider } from "./app/contexts/IngredientsContext";
+import { LocaleProvider } from "./app/contexts/LocaleProvider";
 import ErrorBoundary from "./app/components/ErrorBoundary";
+import { QueryClient, QueryClientProvider } from "react-query";
 import {
   NavigationContainer,
-  DefaultTheme,
   DarkTheme,
+  DefaultTheme,
 } from "@react-navigation/native";
-import "./app/i18n"; // i18n 초기화 파일 임포트
-import { QueryClient, QueryClientProvider } from "react-query";
+import "./app/i18n";
+import { I18nextProvider } from "react-i18next";
+import i18n from "./app/i18n";
 
-// react-query 클라이언트 생성
 const queryClient = new QueryClient();
 
 const AppContent: React.FC = () => {
-  const { theme } = useTheme();
+  const { theme } = useTheme(); // useTheme 사용
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -34,28 +37,34 @@ const AppContent: React.FC = () => {
 
 const App: React.FC = () => {
   return (
-    <ErrorBoundary>
+    <I18nextProvider i18n={i18n}>
       <LanguageProvider>
         <FontSizeProvider>
           <ThemeProvider>
             <FavoritesProvider>
               <SearchProvider>
-                <SafeAreaView style={styles.container}>
-                  <AppContent />
-                </SafeAreaView>
+                <IngredientsProvider>
+                  <LocaleProvider>
+                    <ErrorBoundary>
+                      <SafeAreaView style={styles.container}>
+                        <AppContent />
+                      </SafeAreaView>
+                    </ErrorBoundary>
+                  </LocaleProvider>
+                </IngredientsProvider>
               </SearchProvider>
             </FavoritesProvider>
           </ThemeProvider>
         </FontSizeProvider>
       </LanguageProvider>
-    </ErrorBoundary>
+    </I18nextProvider>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1, // SafeAreaView가 전체 화면을 채우도록 설정
-    backgroundColor: "#fff", // 기본 배경색 설정
+    flex: 1,
+    backgroundColor: "#fff",
   },
 });
 

@@ -81,8 +81,10 @@ export interface RecipeFields {
   slug: string; // 슬러그 (Short text, 필수)
   description: Document; // 설명 (Rich Text, 필수)
   image: {
-    file: {
-      url: string;
+    fields: {
+      file: {
+        url: string;
+      };
     };
   }[]; // 이미지 목록 (Media - Image, 필수)
   category: string; // 기존 카테고리 (Short text, 웹사이트 API용)
@@ -134,3 +136,28 @@ export interface GallerySkeleton extends EntrySkeletonType<GalleryFields> {
 
 // Gallery Entry 타입 정의
 export type Gallery = Entry<GallerySkeleton>;
+
+/** 아래는 추가하려는 코드 **/
+
+export interface RecipeStep {
+  stepNumber: number;
+  description: Document;
+  image?: Asset[];
+  timerDuration?: number; // 타이머 시간 (초 단위)
+}
+
+export interface RecipeEntry {
+  fields: {
+    titel: string;
+    description: Document;
+    image?: any[];
+    category?: string;
+    preparationTime?: number;
+    servings?: number;
+    ingredients: RecipeIngredient[];
+    instructions?: Document; // 조리과정 Rich Text Document
+    steps?: RecipeStep[]; // 단계별 조리 과정 (선택적)
+    videoFile?: any;
+    youTubeUrl?: string;
+  };
+}

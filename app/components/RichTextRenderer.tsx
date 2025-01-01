@@ -1,163 +1,214 @@
 // app/components/RichTextRenderer.tsx
 
 import React from "react";
-import { StyleSheet, Image, Linking, Dimensions } from "react-native";
-import RenderHtml from "react-native-render-html";
-import { RichTextDocument } from "../types/RichText";
-import { useFontSize } from "../contexts/FontSizeContext"; // FontSizeContext 임포트
-import { useTheme } from "../contexts/ThemeContext"; // ThemeContext 임포트
+import { StyleSheet, Text, View, Linking, Image } from "react-native";
+import {
+  documentToReactComponents,
+  Options,
+} from "@contentful/rich-text-react-renderer";
+import { Document, BLOCKS, INLINES, MARKS } from "@contentful/rich-text-types";
+import Timer from "./Timer"; // Timer 컴포넌트 임포트
 
 interface RichTextRendererProps {
-  content?: RichTextDocument; // optional
+  content: Document | string;
+  style?: any;
 }
 
 const RichTextRenderer: React.FC<RichTextRendererProps> = ({
-  content = null,
+  content,
+  style,
 }) => {
-  const { fontSize } = useFontSize();
-  const { colors } = useTheme();
+  const textColor = style?.color || "#000"; // 전달된 색상 또는 기본 색상
 
-  if (!content) {
+  if (typeof content === "string") {
     return (
-      <RenderHtml
-        contentWidth={Dimensions.get("window").width - 40}
-        source={{
-          html: `<p style="color: ${colors.text}; font-size: ${fontSize}px;">No Content Available</p>`,
-        }}
-      />
+      <View style={style}>
+        <Text style={[styles.text, style, { color: textColor }]}>
+          {content}
+        </Text>
+      </View>
     );
   }
 
-  const { width } = Dimensions.get("window");
+  console.log("RichTextRenderer Content:", JSON.stringify(content, null, 2)); // 디버깅 로그 추가
 
-  const richTextToHtml = (richText: RichTextDocument): string => {
-    try {
-      const convertNode = (node: any): string => {
-        switch (node.nodeType) {
-          case "paragraph":
-            return `<p>${node.content.map(convertNode).join("")}</p>`;
-          case "heading-1":
-            return `<h1>${node.content.map(convertNode).join("")}</h1>`;
-          case "heading-2":
-            return `<h2>${node.content.map(convertNode).join("")}</h2>`;
-          case "unordered-list":
-            return `<ul>${node.content.map(convertNode).join("")}</ul>`;
-          case "ordered-list":
-            return `<ol>${node.content.map(convertNode).join("")}</ol>`;
-          case "list-item":
-            return `<li>${node.content.map(convertNode).join("")}</li>`;
-          case "hyperlink":
-            return `<a href="${node.data.uri}">${node.content.map(convertNode).join("")}</a>`;
-          case "text":
-            let text = node.value;
-            if (node.marks) {
-              node.marks.forEach((mark: any) => {
-                if (mark.type === "bold") {
-                  text = `<strong>${text}</strong>`;
-                }
-                if (mark.type === "italic") {
-                  text = `<em>${text}</em>`;
-                }
-              });
-            }
-            return text;
-          case "embedded-asset-block":
-            const url = node.data.target.fields.file.url;
-            const alt = node.data.target.fields.title || "";
-            return `<img src="https:${url}" alt="${alt}" />`;
-          default:
-            return "";
+  const options: Options = {
+    renderNode: {
+      [BLOCKS.PARAGRAPH]: (node, children) => (
+        <Text
+          style={[styles.text, style, { marginVertical: 5, color: textColor }]}
+        >
+          {children}
+        </Text>
+      ),
+      [BLOCKS.HEADING_1]: (node, children) => (
+        <Text
+          style={[styles.heading, style, { fontSize: 24, color: textColor }]}
+        >
+          {children}
+        </Text>
+      ),
+      [BLOCKS.HEADING_2]: (node, children) => (
+        <Text
+          style={[styles.heading, style, { fontSize: 22, color: textColor }]}
+        >
+          {children}
+        </Text>
+      ),
+      [BLOCKS.HEADING_3]: (node, children) => (
+        <Text
+          style={[styles.heading, style, { fontSize: 20, color: textColor }]}
+        >
+          {children}
+        </Text>
+      ),
+      [BLOCKS.HEADING_4]: (node, children) => (
+        <Text
+          style={[styles.heading, style, { fontSize: 18, color: textColor }]}
+        >
+          {children}
+        </Text>
+      ),
+      [BLOCKS.HEADING_5]: (node, children) => (
+        <Text
+          style={[styles.heading, style, { fontSize: 16, color: textColor }]}
+        >
+          {children}
+        </Text>
+      ),
+      [BLOCKS.HEADING_6]: (node, children) => (
+        <Text
+          style={[styles.heading, style, { fontSize: 14, color: textColor }]}
+        >
+          {children}
+        </Text>
+      ),
+      [BLOCKS.UL_LIST]: (node, children) => (
+        <UnorderedList textColor={textColor}>{children}</UnorderedList>
+      ),
+      [BLOCKS.OL_LIST]: (node, children) => (
+        <OrderedList textColor={textColor}>{children}</OrderedList>
+      ),
+      [BLOCKS.LIST_ITEM]: (node, children) => <ListItem>{children}</ListItem>,
+      [BLOCKS.EMBEDDED_ENTRY]: (node) => {
+        const contentTypeId = node.data.target.sys.contentType.sys.id;
+        if (contentTypeId === "timer") {
+          const duration = node.data.target.fields.duration; // 초 단위
+          return (
+            <Timer
+              duration={duration}
+              onFinish={() => {
+                /* 원하는 로직 */
+              }}
+            />
+          );
         }
-      };
-      return richText.content.map(convertNode).join("");
-    } catch (error) {
-      console.error("Error converting rich text to HTML:", error);
-      return "";
-    }
-  };
-
-  const htmlContent = richTextToHtml(content);
-
-  const tagsStyles = {
-    p: {
-      fontSize: fontSize,
-      color: colors.text,
-      marginVertical: 8,
+        return (
+          <View>
+            <Text style={{ color: textColor }}>Embedded Entry</Text>
+          </View>
+        );
+      },
+      [BLOCKS.EMBEDDED_ASSET]: (node) => (
+        <Image
+          source={{ uri: `https:${node.data.target.fields.file.url}` }}
+          style={{ width: 200, height: 200, marginVertical: 10 }}
+          resizeMode="cover"
+        />
+      ),
+      [INLINES.HYPERLINK]: (node, children) => (
+        <Text
+          style={{ color: "blue", textDecorationLine: "underline" }}
+          onPress={() => Linking.openURL(node.data.uri)}
+        >
+          {children}
+        </Text>
+      ),
+      // 추가적인 블록 노드 타입 처리 가능
     },
-    h1: {
-      fontSize: fontSize + 8,
-      fontWeight: "bold",
-      marginVertical: 8,
-      color: colors.text,
+    renderMark: {
+      [MARKS.BOLD]: (text) => (
+        <Text style={{ fontWeight: "bold", color: textColor }}>{text}</Text>
+      ),
+      [MARKS.ITALIC]: (text) => (
+        <Text style={{ fontStyle: "italic", color: textColor }}>{text}</Text>
+      ),
+      // 추가적인 마크 처리 가능
     },
-    h2: {
-      fontSize: fontSize + 4,
-      fontWeight: "bold",
-      marginVertical: 8,
-      color: colors.text,
-    },
-    ul: {
-      marginVertical: 8,
-      paddingLeft: 16,
-    },
-    ol: {
-      marginVertical: 8,
-      paddingLeft: 16,
-    },
-    li: {
-      fontSize: fontSize,
-      color: colors.text,
-    },
-    a: {
-      color: "blue",
-      textDecorationLine: "underline",
-      fontSize: fontSize,
-    },
-    strong: {
-      fontWeight: "bold",
-      color: colors.text,
-      fontSize: fontSize,
-    },
-    em: {
-      fontStyle: "italic",
-      color: colors.text,
-      fontSize: fontSize,
-    },
-    img: {
-      width: width - 40, // same as contentWidth
-      height: 200,
-      borderRadius: 8,
-      marginVertical: 8,
-    },
+    renderText: (text) => (
+      <Text style={[styles.text, style, { color: textColor }]}>{text}</Text>
+    ),
   };
 
   return (
-    <RenderHtml
-      contentWidth={width - 40}
-      source={{ html: htmlContent }}
-      tagsStyles={tagsStyles}
-      renderersProps={{
-        a: {
-          onPress: (event, href) => {
-            Linking.openURL(href);
-          },
-        },
-      }}
-      renderers={{
-        img: (htmlAttribs, children, convertedCSSStyles, passProps) => {
-          const { src, alt } = htmlAttribs;
-          if (!src) return null;
-          return (
-            <Image
-              source={{ uri: src }}
-              style={tagsStyles.img}
-              accessibilityLabel={alt}
-            />
-          );
-        },
-      }}
-    />
+    <View style={style}>
+      {documentToReactComponents(content as Document, options)}
+    </View>
   );
 };
+
+// OrderedList 컴포넌트: 번호가 매겨진 리스트 렌더링
+const OrderedList = ({ children, textColor }) => {
+  return (
+    <View style={{ marginVertical: 5 }}>
+      {React.Children.map(children, (child, index) => (
+        <View
+          key={index}
+          style={{
+            flexDirection: "row",
+            alignItems: "flex-start",
+            marginVertical: 2,
+          }}
+        >
+          <Text style={{ marginRight: 5, color: textColor }}>{index + 1}.</Text>
+          <View style={{ flex: 1 }}>{child}</View>
+        </View>
+      ))}
+    </View>
+  );
+};
+
+// UnorderedList 컴포넌트: 불릿 리스트 렌더링
+const UnorderedList = ({ children, textColor }) => {
+  return (
+    <View style={{ marginVertical: 5 }}>
+      {React.Children.map(children, (child, index) => (
+        <View
+          key={index}
+          style={{
+            flexDirection: "row",
+            alignItems: "flex-start",
+            marginVertical: 2,
+          }}
+        >
+          <Text style={{ marginRight: 5, color: textColor }}>•</Text>
+          <View style={{ flex: 1 }}>{child}</View>
+        </View>
+      ))}
+    </View>
+  );
+};
+
+// ListItem 컴포넌트: 리스트 아이템 렌더링
+const ListItem = ({ children }) => {
+  return <View>{children}</View>;
+};
+
+const styles = StyleSheet.create({
+  text: {
+    fontSize: 16,
+    // color: "#000", // 기본 색상 제거
+  },
+  heading: {
+    fontWeight: "bold",
+    // color: "#000", // 기본 색상 제거
+  },
+  hr: {
+    // borderBottomColor: "#000",
+    borderBottomWidth: 1,
+    marginVertical: 10,
+    alignSelf: "stretch",
+  },
+});
 
 export default RichTextRenderer;

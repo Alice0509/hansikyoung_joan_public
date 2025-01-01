@@ -103,7 +103,7 @@ export const getRecipeById = async (
   try {
     const entry = await client.getEntry<RecipeSkeleton>(recipeId, {
       locale,
-      include: 2,
+      include: 3,
     });
     console.log(`Fetched Recipe ID ${recipeId}:`, entry);
     return entry as Recipe; // 올바르게 타입 캐스팅

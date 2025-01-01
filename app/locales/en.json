@@ -21,5 +21,16 @@
   "search": "Search",
   "search_results": "Search Results",
   "no_categories_available": "No categories available.",
-  "no_recipes_found": "No recipes found."
+  "recipeGuide": "Recipe Guide",
+  "no_recipes_found": "No recipes found.",
+  "timerFinished": "Timer Finished",
+  "timerFinishedMessage": "Timer has completed.",
+  "pause": "Pause",
+  "start": "Start",
+  "reset": "Reset",
+  "startTimer": "Start Timer",
+  "completed": "Completed",
+  "allStepsCompleted": "All Steps Completed",
+  "allStepsCompletedMessage": "You have finished all the cooking steps!",
+  "timerAccessibilityLabel": "Timer, {{minutes}} minutes and {{seconds}} seconds left."
 }

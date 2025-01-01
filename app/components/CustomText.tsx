@@ -1,13 +1,10 @@
 // app/components/CustomText.tsx
 
 import React from "react";
-import { Text, TextProps } from "react-native";
-import { useFontSize } from "../contexts/FontSizeContext";
-import { useTheme } from "../contexts/ThemeContext";
+import { Text, TextProps, StyleSheet } from "react-native";
 
 interface CustomTextProps extends TextProps {
   children: React.ReactNode;
-  style?: any;
 }
 
 const CustomText: React.FC<CustomTextProps> = ({
@@ -15,17 +12,18 @@ const CustomText: React.FC<CustomTextProps> = ({
   style,
   ...props
 }) => {
-  const { fontSize } = useFontSize();
-  const { colors } = useTheme();
-
   return (
-    <Text
-      style={[{ fontSize, color: colors.text }, style]} // 테마 색상 및 글꼴 크기 적용
-      {...props}
-    >
+    <Text style={[styles.text, style]} {...props}>
       {children}
     </Text>
   );
 };
+
+const styles = StyleSheet.create({
+  text: {
+    fontSize: 16,
+    // color: "#000", // 기본 색상 제거
+  },
+});
 
 export default CustomText;

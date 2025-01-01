@@ -2,36 +2,55 @@
 
 import React, { Component, ReactNode } from "react";
 import { View, Text, StyleSheet } from "react-native";
+import { safeStringify } from "../utils/safeStringify"; // safeStringify 임포트
 
-interface Props {
+interface ErrorBoundaryProps {
   children: ReactNode;
 }
 
-interface State {
+interface ErrorBoundaryState {
   hasError: boolean;
   error: Error | null;
+  info: any;
 }
 
-class ErrorBoundary extends Component<Props, State> {
-  constructor(props: Props) {
+class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  constructor(props: ErrorBoundaryProps) {
     super(props);
-    this.state = { hasError: false, error: null };
+    this.state = { hasError: false, error: null, info: null };
   }
 
-  static getDerivedStateFromError(error: Error): State {
+  static getDerivedStateFromError(error: Error): Partial<ErrorBoundaryState> {
     return { hasError: true, error };
   }
 
-  componentDidCatch(error: Error, errorInfo: any) {
-    console.error("ErrorBoundary caught an error", error, errorInfo);
+  componentDidCatch(error: Error, info: any) {
+    console.error("ErrorBoundary caught an error:", error, info);
+    this.setState({ info });
   }
 
   render() {
-    if (this.state.hasError) {
+    if (this.state.hasError && this.state.error) {
+      let errorMessage = this.state.error.toString();
+      let errorDetails = "";
+
+      if (this.state.info?.componentStack) {
+        try {
+          errorDetails = safeStringify(this.state.info.componentStack);
+        } catch (error) {
+          console.error(
+            "ErrorBoundary: Failed to stringify componentStack.",
+            error,
+          );
+          errorDetails = "Unable to display error details.";
+        }
+      }
+
       return (
         <View style={styles.container}>
           <Text style={styles.errorText}>Something went wrong.</Text>
-          <Text style={styles.errorDetails}>{this.state.error?.message}</Text>
+          <Text style={styles.errorMessage}>{errorMessage}</Text>
+          <Text style={styles.errorDetails}>{errorDetails}</Text>
         </View>
       );
     }
@@ -46,18 +65,21 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     padding: 20,
-    backgroundColor: "#fff",
   },
   errorText: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "red",
+    color: "#FF3B30",
     marginBottom: 10,
+  },
+  errorMessage: {
+    fontSize: 16,
+    color: "#555",
   },
   errorDetails: {
     fontSize: 14,
-    color: "#333",
-    textAlign: "center",
+    color: "#999",
+    marginTop: 10,
   },
 });
 

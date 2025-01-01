@@ -7,6 +7,7 @@ import SplashScreen from "../screens/SplashScreen";
 import MainTabNavigator from "./MainTabNavigator";
 import RecipeDetailScreen from "../screens/RecipeDetailScreen";
 import IngredientDetailScreen from "../screens/IngredientDetailScreen";
+import LocalNotificationTestScreen from "../screens/LocalNotificationTestScreen";
 // import FavoritesScreen from "../screens/FavoritesScreen"; // Stack Navigator에서 제거
 
 import { RootStackParamList } from "./types";
@@ -39,6 +40,12 @@ const MainNavigator: React.FC = () => {
         name="IngredientDetail"
         component={IngredientDetailScreen}
         options={{ title: "Ingredient Details" }}
+      />
+      {/* LocalNotificationTestScreen 추가 */}
+      <Stack.Screen
+        name="LocalNotificationTest"
+        component={LocalNotificationTestScreen}
+        options={{ title: "Local Notification Test" }}
       />
       {/* FavoritesScreen 제거 */}
     </Stack.Navigator>
