@@ -1,6 +1,6 @@
 // app/components/Timer.tsx
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -8,12 +8,12 @@ import {
   Alert,
   TouchableOpacity,
   Animated,
-} from "react-native";
+} from 'react-native';
+import { useTranslation } from 'react-i18next';
 import {
   sendLocalNotification,
   registerForPushNotificationsAsync,
-} from "../utils/notifications";
-import { useTranslation } from "react-i18next";
+} from '../utils/notifications';
 
 interface TimerProps {
   duration: number; // 초 단위
@@ -49,9 +49,9 @@ const Timer: React.FC<TimerProps> = ({ duration, onFinish, stepNumber }) => {
       }, 1000);
     } else if (secondsLeft === 0 && isActive && !hasFinishedRef.current) {
       // 타이머 완료 시 알림 전송
-      const message = t("timerFinishedMessage", { stepNumber });
-      Alert.alert(t("timerFinished"), message);
-      sendLocalNotification(t("timerFinished"), message);
+      const message = t('timerFinishedMessage', { stepNumber });
+      Alert.alert(t('timerFinished'), message);
+      sendLocalNotification(t('timerFinished'), message);
       setIsActive(false);
       hasFinishedRef.current = true;
       if (onFinish) {
@@ -92,15 +92,11 @@ const Timer: React.FC<TimerProps> = ({ duration, onFinish, stepNumber }) => {
     }).start();
   };
 
-  console.log(
-    `Timer rendered for step ${stepNumber} with secondsLeft: ${secondsLeft}, isActive: ${isActive}`,
-  );
-
   return (
     <Animated.View
       style={[styles.timerContainer, { opacity: fadeAnim }]}
-      accessible={true}
-      accessibilityLabel={t("timerAccessibilityLabel", { minutes, seconds })}
+      accessible
+      accessibilityLabel={t('timerAccessibilityLabel', { minutes, seconds })}
     >
       <Text style={styles.timerText}>
         {minutes}:{seconds < 10 ? `0${seconds}` : seconds}
@@ -109,20 +105,20 @@ const Timer: React.FC<TimerProps> = ({ duration, onFinish, stepNumber }) => {
         <TouchableOpacity
           onPress={toggleTimer}
           style={styles.button}
-          accessible={true}
-          accessibilityLabel={isActive ? t("pause") : t("start")}
+          accessible
+          accessibilityLabel={isActive ? t('pause') : t('start')}
         >
           <Text style={styles.toggleText}>
-            {isActive ? t("pause") : t("start")}
+            {isActive ? t('pause') : t('start')}
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
           onPress={resetTimer}
           style={styles.button}
-          accessible={true}
-          accessibilityLabel={t("reset")}
+          accessible
+          accessibilityLabel={t('reset')}
         >
-          <Text style={styles.resetText}>{t("reset")}</Text>
+          <Text style={styles.resetText}>{t('reset')}</Text>
         </TouchableOpacity>
       </View>
     </Animated.View>
@@ -131,12 +127,12 @@ const Timer: React.FC<TimerProps> = ({ duration, onFinish, stepNumber }) => {
 
 const styles = StyleSheet.create({
   timerContainer: {
-    backgroundColor: "#e0f7fa",
+    backgroundColor: '#e0f7fa',
     padding: 15,
     borderRadius: 10,
     marginTop: 10,
-    alignItems: "center",
-    shadowColor: "#000",
+    alignItems: 'center',
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 4,
@@ -144,24 +140,24 @@ const styles = StyleSheet.create({
   },
   timerText: {
     fontSize: 32,
-    fontWeight: "bold",
-    color: "#00796b",
+    fontWeight: 'bold',
+    color: '#00796b',
   },
   buttonsContainer: {
-    flexDirection: "row",
+    flexDirection: 'row',
     marginTop: 10,
   },
   button: {
     marginHorizontal: 10,
   },
   toggleText: {
-    color: "#00796b",
-    textDecorationLine: "underline",
+    color: '#00796b',
+    textDecorationLine: 'underline',
     fontSize: 16,
   },
   resetText: {
-    color: "#d32f2f",
-    textDecorationLine: "underline",
+    color: '#d32f2f',
+    textDecorationLine: 'underline',
     fontSize: 16,
   },
 });

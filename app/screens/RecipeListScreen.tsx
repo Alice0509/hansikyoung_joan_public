@@ -1,23 +1,23 @@
 // app/screens/RecipeListScreen.tsx
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from 'react';
 import {
   View,
   FlatList,
   StyleSheet,
   ActivityIndicator,
   Text,
-} from "react-native";
-import { useNavigation } from "@react-navigation/native";
-import { StackNavigationProp } from "@react-navigation/stack";
-import { RootStackParamList } from "../navigation/types";
-import { Recipe } from "../types/Recipe";
-import RecipeCard from "../components/RecipeCard"; // RecipeCard 임포트
-import { getAllRecipes } from "../lib/contentful"; // getAllRecipes 임포트
+} from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { RootStackParamList } from '../navigation/types';
+import { Recipe } from '../types/Recipe';
+import RecipeCard from '../components/RecipeCard'; // RecipeCard 임포트
+import { getAllRecipes } from '../lib/contentful'; // getAllRecipes 임포트
 
 type RecipeListScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
-  "RecipeList"
+  'RecipeList'
 >;
 
 const RecipeListScreen: React.FC = () => {
@@ -29,7 +29,7 @@ const RecipeListScreen: React.FC = () => {
   useEffect(() => {
     const fetchRecipes = async () => {
       try {
-        const data = await getAllRecipes("en"); // 필요한 locale로 설정
+        const data = await getAllRecipes('en'); // 필요한 locale로 설정
         // 이미지가 있거나 유튜브 URL이 있는 레시피만 필터링
         const filteredData = data.filter(
           (recipe) =>
@@ -39,10 +39,9 @@ const RecipeListScreen: React.FC = () => {
             recipe.fields.youTubeUrl,
         );
         setRecipes(filteredData);
-        console.log("Fetched Recipes:", filteredData);
       } catch (error) {
-        console.error("Error fetching recipes:", error);
-        setError("Failed to load recipes.");
+        console.error('Error fetching recipes:', error);
+        setError('Failed to load recipes.');
       } finally {
         setLoading(false);
       }
@@ -55,13 +54,13 @@ const RecipeListScreen: React.FC = () => {
     <RecipeCard
       recipe={item}
       onPress={() =>
-        navigation.navigate("RecipeDetail", {
+        navigation.navigate('RecipeDetail', {
           recipeId: item.sys.id,
-          locale: "en",
+          locale: 'en',
         })
       }
-      fullWidth={true} // 전체 너비 사용
-      showCategory={true}
+      fullWidth // 전체 너비 사용
+      showCategory
     />
   );
 
@@ -108,17 +107,17 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: "#fff",
+    backgroundColor: '#fff',
   },
   loadingContainer: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   centeredContainer: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
     paddingHorizontal: 20,
   },
   listContainer: {
@@ -126,14 +125,14 @@ const styles = StyleSheet.create({
     // alignItems: "center", // 전체 너비 사용 시 필요 없음
   },
   errorText: {
-    textAlign: "center",
+    textAlign: 'center',
     fontSize: 16,
-    color: "red",
+    color: 'red',
   },
   noDataText: {
-    textAlign: "center",
+    textAlign: 'center',
     fontSize: 16,
-    color: "#000",
+    color: '#000',
   },
 });
 

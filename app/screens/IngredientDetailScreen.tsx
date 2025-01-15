@@ -1,34 +1,34 @@
 // app/screens/IngredientDetailScreen.tsx
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from 'react';
 import {
   ScrollView,
   View,
   Image,
   ActivityIndicator,
   StyleSheet,
-} from "react-native";
-import { RouteProp } from "@react-navigation/native";
-import { StackNavigationProp } from "@react-navigation/stack";
-import { RootStackParamList } from "../navigation/types";
-import { getIngredientById } from "../lib/contentful";
-import CustomText from "../components/CustomText";
-import RichTextRenderer from "../components/RichTextRenderer";
-import { useTheme } from "../contexts/ThemeContext";
-import { useFontSize } from "../contexts/FontSizeContext";
-import { IngredientFields } from "../types/Recipe";
-import { Entry, Document } from "contentful";
-import { useLanguage } from "../contexts/LanguageContext";
-import { normalizeRichText } from "../utils/normalizeRichText";
+} from 'react-native';
+import { RouteProp } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { Entry, Document } from 'contentful';
+import { RootStackParamList } from '../navigation/types';
+import { getIngredientById } from '../lib/contentful';
+import CustomText from '../components/CustomText';
+import RichTextRenderer from '../components/RichTextRenderer';
+import { useTheme } from '../contexts/ThemeContext';
+import { useFontSize } from '../contexts/FontSizeContext';
+import { IngredientFields } from '../types/Recipe';
+import { useLanguage } from '../contexts/LanguageContext';
+import { normalizeRichText } from '../utils/normalizeRichText';
 
 type IngredientDetailRouteProp = RouteProp<
   RootStackParamList,
-  "IngredientDetail"
+  'IngredientDetail'
 >;
 
 type IngredientDetailNavigationProp = StackNavigationProp<
   RootStackParamList,
-  "IngredientDetail"
+  'IngredientDetail'
 >;
 
 interface IngredientDetailProps {
@@ -54,25 +54,19 @@ const IngredientDetailScreen: React.FC<IngredientDetailProps> = ({
     const fetchIngredient = async () => {
       try {
         const data = await getIngredientById(ingredientId, language);
-        console.log("Fetched Ingredient Data:", data);
 
         // Rich Text 필드 표준화
         const normalizedFields = { ...data.fields };
-        ["description"].forEach((field) => {
+        ['description'].forEach((field) => {
           if (
             data.fields[field] &&
-            (data.fields[field] as any).nodeType === "document"
+            (data.fields[field] as any).nodeType === 'document'
           ) {
             normalizedFields[field] = normalizeRichText(
               data.fields[field] as Document,
             );
-            console.log(
-              `Normalized ${field}:`,
-              JSON.stringify(normalizedFields[field], null, 2),
-            );
-          } else if (typeof data.fields[field] === "string") {
+          } else if (typeof data.fields[field] === 'string') {
             normalizedFields[field] = data.fields[field];
-            console.log(`Field ${field} is a string and was not normalized.`);
           } else {
             console.warn(`Field ${field} is neither a Document nor a string.`);
           }
@@ -83,14 +77,12 @@ const IngredientDetailScreen: React.FC<IngredientDetailProps> = ({
         // 이미지 URL 설정
         if (normalizedFields.bild && normalizedFields.bild.fields.file.url) {
           const url = `https:${normalizedFields.bild.fields.file.url}`;
-          console.log("Image URL:", url);
           setImageUrl(url);
         } else {
-          console.log("No image found for this ingredient.");
           setImageUrl(null);
         }
       } catch (error) {
-        console.error("Error fetching ingredient details:", error);
+        console.error('Error fetching ingredient details:', error);
       } finally {
         setLoading(false);
       }
@@ -130,13 +122,13 @@ const IngredientDetailScreen: React.FC<IngredientDetailProps> = ({
             style={styles.image}
             resizeMode="cover"
             onError={(error) => {
-              console.error("Failed to load image:", error.nativeEvent.error);
+              console.error('Failed to load image:', error.nativeEvent.error);
               setImageUrl(null); // 이미지 로딩 실패 시 기본 이미지로 전환
             }}
           />
         ) : (
           <Image
-            source={require("../../assets/images/default.png")}
+            source={require('../../assets/images/default.png')}
             style={styles.image}
             resizeMode="cover"
           />
@@ -163,33 +155,33 @@ const getStyles = (colors: any, fontSize: number) =>
     },
     contentContainer: {
       flex: 1,
-      alignItems: "center",
-      justifyContent: "flex-start", // 위에서부터 시작하도록 변경
+      alignItems: 'center',
+      justifyContent: 'flex-start', // 위에서부터 시작하도록 변경
     },
     loadingContainer: {
       flex: 1,
-      justifyContent: "center",
-      alignItems: "center",
+      justifyContent: 'center',
+      alignItems: 'center',
     },
     notFoundText: {
-      fontSize: fontSize,
-      color: "#ff0000",
-      textAlign: "center",
+      fontSize,
+      color: '#ff0000',
+      textAlign: 'center',
     },
     title: {
-      fontWeight: "bold",
+      fontWeight: 'bold',
       fontSize: fontSize + 4,
       color: colors.text,
       marginVertical: 10,
-      textAlign: "center",
+      textAlign: 'center',
     },
     description: {
-      fontSize: fontSize,
+      fontSize,
       color: colors.text,
-      textAlign: "left", // 왼쪽 정렬로 변경
+      textAlign: 'left', // 왼쪽 정렬로 변경
     },
     image: {
-      width: "100%",
+      width: '100%',
       height: 200,
       borderRadius: 8,
       marginBottom: 10,

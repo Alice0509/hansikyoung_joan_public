@@ -1,8 +1,8 @@
 // app/lib/contentful.ts
 
-import { createClient, Entry } from "contentful";
-import { Recipe, Category, Ingredient, RecipeSkeleton } from "../types/Recipe";
-import { CONTENTFUL_SPACE_ID, CONTENTFUL_ACCESS_TOKEN } from "@env";
+import { createClient, Entry } from 'contentful';
+import { CONTENTFUL_SPACE_ID, CONTENTFUL_ACCESS_TOKEN } from '@env';
+import { Recipe, Category, Ingredient, RecipeSkeleton } from '../types/Recipe';
 
 // Contentful 클라이언트 생성
 const client = createClient({
@@ -15,23 +15,19 @@ const client = createClient({
  */
 export const getRecipesByCategory = async (
   categoryId: string,
-  locale: string = "en",
+  locale = 'en',
 ): Promise<Recipe[]> => {
   try {
     const entries = await client.getEntries<RecipeSkeleton>({
-      content_type: "recipe",
+      content_type: 'recipe',
       locale,
-      "fields.categories.sys.id": categoryId, // 'categories' 필드 사용 (다중 참조)
+      'fields.categories.sys.id': categoryId, // 'categories' 필드 사용 (다중 참조)
       include: 2,
     });
-    console.log(
-      `Fetched Recipes for Category ID ${categoryId}:`,
-      entries.items,
-    );
     return entries.items as Recipe[];
   } catch (error) {
-    console.error("Error fetching recipes by category:", error);
-    throw new Error("Failed to fetch recipes by category.");
+    console.error('Error fetching recipes by category:', error);
+    throw new Error('Failed to fetch recipes by category.');
   }
 };
 
@@ -39,38 +35,35 @@ export const getRecipesByCategory = async (
  * 모든 카테고리를 로케일과 함께 가져옵니다.
  */
 export const getAllCategories = async (
-  locale: string = "en",
+  locale = 'en',
 ): Promise<Entry<Category>[]> => {
   try {
     const entries = await client.getEntries<Category>({
-      content_type: "category",
+      content_type: 'category',
       locale,
-      order: "fields.order", // 정렬 순서
+      order: 'fields.order', // 정렬 순서
     });
     return entries.items;
   } catch (error) {
-    console.error("Error fetching categories:", error);
-    throw new Error("Failed to fetch categories.");
+    console.error('Error fetching categories:', error);
+    throw new Error('Failed to fetch categories.');
   }
 };
 
 /**
  * 모든 레시피를 로케일과 함께 가져옵니다.
  */
-export const getAllRecipes = async (
-  locale: string = "en",
-): Promise<Recipe[]> => {
+export const getAllRecipes = async (locale = 'en'): Promise<Recipe[]> => {
   try {
     const entries = await client.getEntries<RecipeSkeleton>({
-      content_type: "recipe",
+      content_type: 'recipe',
       locale,
       include: 2, // 연결된 엔트리 포함 수준
     });
-    console.log("Fetched Recipes:", entries.items); // 데이터 확인
     return entries.items as Recipe[]; // 올바르게 타입 캐스팅
   } catch (error) {
-    console.error("Error fetching recipes:", error);
-    throw new Error("Failed to fetch recipes.");
+    console.error('Error fetching recipes:', error);
+    throw new Error('Failed to fetch recipes.');
   }
 };
 
@@ -78,18 +71,18 @@ export const getAllRecipes = async (
  * 모든 Ingredients를 가져옵니다.
  */
 export const getAllIngredients = async (
-  locale: string = "en",
+  locale = 'en',
 ): Promise<Entry<Ingredient>[]> => {
   try {
     const entries = await client.getEntries<Ingredient>({
-      content_type: "ingredient", // Contentful에서 설정한 콘텐츠 타입
+      content_type: 'ingredient', // Contentful에서 설정한 콘텐츠 타입
       locale,
       include: 3,
     });
     return entries.items as Entry<Ingredient>[];
   } catch (error) {
-    console.error("Error fetching all ingredients:", error);
-    throw new Error("Failed to fetch ingredients.");
+    console.error('Error fetching all ingredients:', error);
+    throw new Error('Failed to fetch ingredients.');
   }
 };
 
@@ -98,18 +91,17 @@ export const getAllIngredients = async (
  */
 export const getRecipeById = async (
   recipeId: string,
-  locale: string = "en",
+  locale = 'en',
 ): Promise<Recipe> => {
   try {
     const entry = await client.getEntry<RecipeSkeleton>(recipeId, {
       locale,
       include: 3,
     });
-    console.log(`Fetched Recipe ID ${recipeId}:`, entry);
     return entry as Recipe; // 올바르게 타입 캐스팅
   } catch (error) {
     console.error(`Error fetching recipe with id ${recipeId}:`, error);
-    throw new Error("Failed to fetch recipe.");
+    throw new Error('Failed to fetch recipe.');
   }
 };
 
@@ -118,7 +110,7 @@ export const getRecipeById = async (
  */
 export const getIngredientById = async (
   ingredientId: string,
-  locale: string = "en",
+  locale = 'en',
 ): Promise<Entry<Ingredient>> => {
   try {
     const entry = await client.getEntry<Ingredient>(ingredientId, {
@@ -128,7 +120,7 @@ export const getIngredientById = async (
     return entry;
   } catch (error) {
     console.error(`Error fetching ingredient with id ${ingredientId}:`, error);
-    throw new Error("Failed to fetch ingredient.");
+    throw new Error('Failed to fetch ingredient.');
   }
 };
 
@@ -136,7 +128,7 @@ export const getIngredientById = async (
  * 모든 카테고리와 해당 카테고리에 속한 레시피를 가져옵니다.
  */
 export const fetchCategoriesWithRecipes = async (
-  locale: string = "en",
+  locale = 'en',
 ): Promise<{ category: Entry<Category>; recipes: Recipe[] }[]> => {
   try {
     const categories = await getAllCategories(locale);
@@ -157,7 +149,7 @@ export const fetchCategoriesWithRecipes = async (
 
     return categoriesData;
   } catch (error) {
-    console.error("Error fetching categories with recipes:", error);
-    throw new Error("Failed to fetch categories with recipes.");
+    console.error('Error fetching categories with recipes:', error);
+    throw new Error('Failed to fetch categories with recipes.');
   }
 };

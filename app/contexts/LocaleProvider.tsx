@@ -1,6 +1,6 @@
-//app/contexts/LocaleProvider.tsx
+// app/contexts/LocaleProvider.tsx
 
-import React, { createContext, useContext, useState, ReactNode } from "react";
+import React, { createContext, useContext, useState, ReactNode } from 'react';
 
 interface LocaleContextProps {
   locale: string;
@@ -12,7 +12,7 @@ const LocaleContext = createContext<LocaleContextProps | undefined>(undefined);
 export const LocaleProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
-  const [locale, setLocale] = useState<string>("en");
+  const [locale, setLocale] = useState<string>('en');
 
   return (
     <LocaleContext.Provider value={{ locale, setLocale }}>
@@ -24,7 +24,7 @@ export const LocaleProvider: React.FC<{ children: ReactNode }> = ({
 export const useLocale = (): LocaleContextProps => {
   const context = useContext(LocaleContext);
   if (!context) {
-    throw new Error("useLocale must be used within a LocaleProvider");
+    throw new Error('useLocale must be used within a LocaleProvider');
   }
   return context;
 };

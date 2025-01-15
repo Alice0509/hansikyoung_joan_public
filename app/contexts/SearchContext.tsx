@@ -1,6 +1,6 @@
 // app/contexts/SearchContext.tsx
 
-import React, { createContext, useContext, useState, ReactNode } from "react";
+import React, { createContext, useContext, useState, ReactNode } from 'react';
 
 interface SearchContextProps {
   keyword: string;
@@ -16,7 +16,7 @@ const SearchContext = createContext<SearchContextProps | undefined>(undefined);
 export const SearchProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
-  const [keyword, setKeyword] = useState<string>("");
+  const [keyword, setKeyword] = useState<string>('');
   const [filter, setFilter] = useState<{ category: string | null }>({
     category: null,
   });
@@ -31,7 +31,7 @@ export const SearchProvider: React.FC<{ children: ReactNode }> = ({
 export const useSearch = (): SearchContextProps => {
   const context = useContext(SearchContext);
   if (!context) {
-    throw new Error("useSearch must be used within a SearchProvider");
+    throw new Error('useSearch must be used within a SearchProvider');
   }
   return context;
 };

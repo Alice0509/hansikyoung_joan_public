@@ -1,12 +1,12 @@
 // app/components/IngredientsChecklist.tsx
 
-import React from "react";
-import { View, StyleSheet, TouchableOpacity, Linking } from "react-native";
-import CustomText from "./CustomText";
-import { MaterialIcons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
-import { RootStackParamList } from "../navigation/types";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import React from 'react';
+import { View, StyleSheet, TouchableOpacity, Linking } from 'react-native';
+import { MaterialIcons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../navigation/types';
+import CustomText from './CustomText';
 
 interface Ingredient {
   name: string;
@@ -30,7 +30,7 @@ interface IngredientsChecklistProps {
 
 type NavigationProp = NativeStackNavigationProp<
   RootStackParamList,
-  "IngredientDetail"
+  'IngredientDetail'
 >;
 
 const IngredientsChecklist: React.FC<IngredientsChecklistProps> = ({
@@ -49,7 +49,7 @@ const IngredientsChecklist: React.FC<IngredientsChecklistProps> = ({
 
   const handleIngredientPress = (ingredient: Ingredient) => {
     if (ingredient.id) {
-      navigation.navigate("IngredientDetail", { ingredientId: ingredient.id });
+      navigation.navigate('IngredientDetail', { ingredientId: ingredient.id });
     } else {
       // Ingredient ID가 없을 경우, 다른 동작을 정의할 수 있습니다.
       Linking.openURL(`https://example.com/ingredients/${ingredient.name}`);
@@ -81,7 +81,7 @@ const IngredientsChecklist: React.FC<IngredientsChecklistProps> = ({
               fontSize: fontSize + 2,
               color: colors.text,
               flex: 1,
-              textAlign: "right",
+              textAlign: 'right',
             },
           ]}
         >
@@ -91,7 +91,7 @@ const IngredientsChecklist: React.FC<IngredientsChecklistProps> = ({
       {/* 테이블 본문 */}
       {ingredients.map((ingredient, index) => (
         <TouchableOpacity
-          key={index}
+          key={ingredient.id || index} // 가능하다면 고유한 id 사용
           style={[
             styles.tableRow,
             ingredient.image
@@ -104,20 +104,40 @@ const IngredientsChecklist: React.FC<IngredientsChecklistProps> = ({
             }
           }}
           disabled={!ingredient.image} // 이미지가 없으면 터치 비활성화
+          accessible
+          accessibilityRole="button"
+          accessibilityLabel={
+            ingredient.image
+              ? `View details for ${ingredient.name}`
+              : `${ingredient.name} ingredient`
+          }
+          accessibilityHint={
+            ingredient.image
+              ? `Navigates to detailed information about ${ingredient.name}`
+              : `Ingredient ${ingredient.name}`
+          }
         >
           {/* Ingredient Name Cell */}
           <View style={styles.tableCell}>
             <TouchableOpacity
               onPress={() => onToggleCheck(index)}
               style={styles.checkboxContainer}
+              accessible
+              accessibilityRole="checkbox"
+              accessibilityLabel={`${ingredient.name} checkbox`}
+              accessibilityState={{
+                checked: adjustedCheckedIngredients[index],
+              }}
+              accessibilityHint={`Toggle selection for ${ingredient.name}`}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }} // 터치 영역 확장
             >
               <MaterialIcons
                 name={
                   adjustedCheckedIngredients[index]
-                    ? "check-box"
-                    : "check-box-outline-blank"
+                    ? 'check-box'
+                    : 'check-box-outline-blank'
                 }
-                size={24}
+                size={fontSize * 1.5} // fontSize에 비례하여 체크박스 크기 조정
                 color={colors.text}
               />
             </TouchableOpacity>
@@ -127,7 +147,7 @@ const IngredientsChecklist: React.FC<IngredientsChecklistProps> = ({
                 {
                   fontSize,
                   color: ingredient.image ? colors.linkText : colors.text,
-                  textDecorationLine: ingredient.image ? "underline" : "none",
+                  textDecorationLine: ingredient.image ? 'underline' : 'none',
                 },
               ]}
             >
@@ -136,7 +156,7 @@ const IngredientsChecklist: React.FC<IngredientsChecklistProps> = ({
             {ingredient.image && (
               <MaterialIcons
                 name="link"
-                size={16}
+                size={fontSize * 1.2} // fontSize에 비례하여 아이콘 크기 조정
                 color={colors.linkText}
                 style={styles.linkIcon}
                 accessibilityLabel={`${ingredient.name} details`}
@@ -159,41 +179,88 @@ const IngredientsChecklist: React.FC<IngredientsChecklistProps> = ({
 const styles = StyleSheet.create({
   tableContainer: {
     borderWidth: 1,
-    borderColor: "#ddd",
+    borderColor: '#ddd',
     borderRadius: 8,
-    overflow: "hidden",
+    overflow: 'hidden',
   },
   tableRow: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingVertical: 10,
     borderBottomWidth: 1,
-    borderBottomColor: "#ddd",
+    borderBottomColor: '#ddd',
   },
   tableHeader: {
     // backgroundColor는 props를 통해 동적으로 설정
   },
   headerText: {
-    fontWeight: "bold",
+    fontWeight: 'bold',
   },
   tableCell: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     flex: 3, // Ingredient 열에 더 많은 공간 할당
   },
   checkboxContainer: {
     marginRight: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   ingredientText: {
     flexShrink: 1, // 텍스트가 길어질 경우 줄바꿈을 허용
   },
   quantityText: {
     flex: 1,
-    textAlign: "right",
+    textAlign: 'right',
     marginRight: 10,
   },
   linkIcon: {
     marginLeft: 5,
+  },
+  orderedList: {
+    marginVertical: 5,
+    paddingLeft: 10,
+  },
+  unorderedList: {
+    marginVertical: 5,
+    paddingLeft: 10,
+  },
+  orderedListItem: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginVertical: 2,
+  },
+  orderedListNumber: {
+    marginRight: 5,
+    color: '#000',
+  },
+  unorderedListItem: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginVertical: 2,
+  },
+  unorderedListBullet: {
+    marginRight: 5,
+    color: '#000',
+  },
+  listItemTextContainer: {
+    flex: 1,
+  },
+  listItemText: {
+    flex: 1,
+    color: '#000',
+  },
+  blockquote: {
+    fontStyle: 'italic',
+    borderLeftWidth: 4,
+    borderLeftColor: '#ccc',
+    paddingLeft: 10,
+    marginVertical: 10,
+  },
+  hr: {
+    height: 1,
+    backgroundColor: '#ddd',
+    marginVertical: 10,
   },
 });
 

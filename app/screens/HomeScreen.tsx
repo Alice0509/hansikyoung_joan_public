@@ -1,6 +1,6 @@
 // app/screens/HomeScreen.tsx
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -9,21 +9,21 @@ import {
   ActivityIndicator,
   ScrollView,
   Button,
-} from "react-native";
-import { useNavigation } from "@react-navigation/native";
-import { StackNavigationProp } from "@react-navigation/stack";
-import { fetchCategoriesWithRecipes } from "../lib/contentful";
-import { Entry } from "contentful";
-import { Category, Recipe } from "../types/Recipe"; // 'RecipeEntry' 대신 'Recipe' 사용
-import RecipeCard from "../components/RecipeCard";
-import { useSearch } from "../contexts/SearchContext";
-import { useTranslation } from "react-i18next";
-import SearchBar from "../components/SearchBar";
-import { useDebounce } from "use-debounce";
-import { documentToPlainTextString } from "@contentful/rich-text-plain-text-renderer"; // Rich Text 변환
-import { useLanguage } from "../contexts/LanguageContext"; // LanguageContext 사용
+} from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { Entry } from 'contentful';
+import { useTranslation } from 'react-i18next';
+import { useDebounce } from 'use-debounce';
+import { documentToPlainTextString } from '@contentful/rich-text-plain-text-renderer'; // Rich Text 변환
+import { fetchCategoriesWithRecipes } from '../lib/contentful';
+import { Category, Recipe } from '../types/Recipe'; // 'RecipeEntry' 대신 'Recipe' 사용
+import RecipeCard from '../components/RecipeCard';
+import { useSearch } from '../contexts/SearchContext';
+import SearchBar from '../components/SearchBar';
+import { useLanguage } from '../contexts/LanguageContext'; // LanguageContext 사용
 
-type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, "Main">;
+type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Main'>;
 
 interface CategoryWithRecipes {
   category: Entry<Category>;
@@ -46,19 +46,17 @@ const HomeScreen: React.FC = () => {
   const { language } = useLanguage(); // LanguageContext에서 현재 언어 가져오기
 
   // 로케일 설정 (localeMap 사용하지 않고 직접 language 사용)
-  const locale = language || "en"; // 'en' 또는 'de'
+  const locale = language || 'en'; // 'en' 또는 'de'
 
   useEffect(() => {
     const fetchCategoriesAndRecipes = async () => {
       try {
         const categoriesData = await fetchCategoriesWithRecipes(locale);
-        console.log("Fetched Categories with Recipes:", categoriesData); // 디버깅용 로그
         setCategoriesWithRecipes(categoriesData);
         setFilteredCategories(categoriesData); // 초기 상태 설정
-        console.log("Filtered Categories set:", categoriesData); // 추가 로그
       } catch (error) {
-        console.error("Error fetching categories and recipes:", error);
-        setError(t("failed_to_load_categories_and_recipes"));
+        console.error('Error fetching categories and recipes:', error);
+        setError(t('failed_to_load_categories_and_recipes'));
       } finally {
         setLoading(false);
       }
@@ -68,20 +66,19 @@ const HomeScreen: React.FC = () => {
   }, [locale, t]);
 
   useEffect(() => {
-    if (debouncedKeyword.trim() === "") {
+    if (debouncedKeyword.trim() === '') {
       setFilteredCategories(categoriesWithRecipes);
-      console.log("Filtered Categories updated to categoriesWithRecipes");
     } else {
       const lowerKeyword = debouncedKeyword.toLowerCase();
       const filtered = categoriesWithRecipes
         .map(({ category, recipes }) => {
           const filteredRecipes = recipes.filter((recipe: Recipe) => {
             // 'Recipe' 타입 사용
-            const name = recipe.fields.titel || "";
-            let description = "";
+            const name = recipe.fields.titel || '';
+            let description = '';
 
             if (recipe.fields.description) {
-              if (typeof recipe.fields.description === "string") {
+              if (typeof recipe.fields.description === 'string') {
                 description = recipe.fields.description;
               } else {
                 // Rich Text 필드인 경우 플레인 텍스트로 변환
@@ -100,14 +97,13 @@ const HomeScreen: React.FC = () => {
         })
         .filter(({ recipes }) => recipes.length > 0);
       setFilteredCategories(filtered);
-      console.log("Filtered Categories after search:", filtered);
     }
   }, [debouncedKeyword, categoriesWithRecipes]);
 
   const renderRecipeItem = ({ item }: { item: Recipe }) => {
     // 'RecipeEntry' 대신 'Recipe' 사용
     if (!item || !item.sys || !item.sys.id) {
-      console.warn("Invalid recipe item:", item);
+      console.warn('Invalid recipe item:', item);
       return null; // 또는 대체 UI
     }
 
@@ -115,7 +111,7 @@ const HomeScreen: React.FC = () => {
       <RecipeCard
         recipe={item}
         onPress={() =>
-          navigation.navigate("RecipeDetail", { recipeId: item.sys.id })
+          navigation.navigate('RecipeDetail', { recipeId: item.sys.id })
         }
         fullWidth={false} // 홈 스크린에서는 전체 너비 사용 안 함
       />
@@ -132,10 +128,9 @@ const HomeScreen: React.FC = () => {
         const categoriesData = await fetchCategoriesWithRecipes(locale);
         setCategoriesWithRecipes(categoriesData);
         setFilteredCategories(categoriesData);
-        console.log("Retry: Fetched Categories with Recipes:", categoriesData); // 추가 로그
       } catch (error) {
-        console.error("Error fetching categories and recipes:", error);
-        setError(t("failed_to_load_categories_and_recipes"));
+        console.error('Error fetching categories and recipes:', error);
+        setError(t('failed_to_load_categories_and_recipes'));
       } finally {
         setLoading(false);
       }
@@ -158,7 +153,7 @@ const HomeScreen: React.FC = () => {
         <Text style={styles.errorText}>{error}</Text>
         {/* 재시도 버튼 추가 */}
         <View style={styles.retryButton}>
-          <Button title={t("retry")} onPress={handleRetry} />
+          <Button title={t('retry')} onPress={handleRetry} />
         </View>
       </View>
     );
@@ -167,7 +162,7 @@ const HomeScreen: React.FC = () => {
   if (categoriesWithRecipes.length === 0) {
     return (
       <View style={styles.centeredContainer}>
-        <Text style={styles.noDataText}>{t("no_categories_available")}</Text>
+        <Text style={styles.noDataText}>{t('no_categories_available')}</Text>
       </View>
     );
   }
@@ -197,7 +192,7 @@ const HomeScreen: React.FC = () => {
               />
             ) : (
               <Text style={styles.noRecipesText}>
-                {t("no_recipes_available")}
+                {t('no_recipes_available')}
               </Text>
             )}
           </View>
@@ -210,13 +205,13 @@ const HomeScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: '#fff',
     padding: 10,
   },
   loadingContainer: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   categorySection: {
     marginBottom: 20,
@@ -224,7 +219,7 @@ const styles = StyleSheet.create({
   },
   categoryTitle: {
     fontSize: 20,
-    fontWeight: "bold",
+    fontWeight: 'bold',
     marginBottom: 10,
   },
   recipesList: {
@@ -232,24 +227,24 @@ const styles = StyleSheet.create({
   },
   noRecipesText: {
     fontSize: 16,
-    color: "#666",
-    fontStyle: "italic",
+    color: '#666',
+    fontStyle: 'italic',
   },
   errorText: {
-    textAlign: "center",
+    textAlign: 'center',
     fontSize: 16,
-    color: "red",
+    color: 'red',
   },
   centeredContainer: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
     paddingHorizontal: 20, // 좌우 패딩 추가
   },
   noDataText: {
-    textAlign: "center",
+    textAlign: 'center',
     fontSize: 16,
-    color: "#000",
+    color: '#000',
   },
   retryButton: {
     marginTop: 10,
@@ -257,7 +252,7 @@ const styles = StyleSheet.create({
   debugText: {
     // 디버깅을 위한 스타일
     fontSize: 12,
-    color: "#888",
+    color: '#888',
     marginBottom: 5,
   },
 });

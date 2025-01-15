@@ -1,9 +1,9 @@
 // app/types/Recipe.ts
 
-import { Entry, EntrySkeletonType } from "contentful";
-import { Document } from "@contentful/rich-text-types"; // Contentful Rich Text 타입
+import { Entry, EntrySkeletonType } from 'contentful';
+import { Document } from '@contentful/rich-text-types'; // Contentful Rich Text 타입
 
-/** 공통 타입 정의 **/
+/** 공통 타입 정의 * */
 
 // 위치 정보 타입
 export interface Location {
@@ -11,7 +11,7 @@ export interface Location {
   lon: number; // 경도
 }
 
-/** Ingredient 타입 정의 **/
+/** Ingredient 타입 정의 * */
 
 // Ingredient Content Type의 필드 정의
 export interface IngredientFields {
@@ -28,9 +28,9 @@ export interface IngredientFields {
   slug?: string;
 }
 
-export interface Ingredient extends Entry<IngredientFields> {}
+export type Ingredient = Entry<IngredientFields>;
 
-/** RecipeIngredient 타입 정의 **/
+/** RecipeIngredient 타입 정의 * */
 
 // RecipeIngredient Content Type의 필드 정의
 export interface RecipeIngredientFields {
@@ -43,13 +43,13 @@ export interface RecipeIngredientFields {
 export interface RecipeIngredientSkeleton
   extends EntrySkeletonType<RecipeIngredientFields> {
   fields: RecipeIngredientFields;
-  contentTypeId: "recipeIngredient";
+  contentTypeId: 'recipeIngredient';
 }
 
 // RecipeIngredient Entry 타입 정의
 export type RecipeIngredient = Entry<RecipeIngredientSkeleton>;
 
-/** Category 타입 정의 **/
+/** Category 타입 정의 * */
 
 // Category Content Type의 필드 정의
 export interface CategoryFields {
@@ -67,13 +67,13 @@ export interface CategoryFields {
 // Category Content Type의 스켈레톤 정의
 export interface CategorySkeleton extends EntrySkeletonType<CategoryFields> {
   fields: CategoryFields;
-  contentTypeId: "category"; // Contentful에서 설정한 콘텐츠 타입 ID
+  contentTypeId: 'category'; // Contentful에서 설정한 콘텐츠 타입 ID
 }
 
 // Category Entry 타입 정의
 export type Category = Entry<CategorySkeleton>;
 
-/** Recipe 타입 정의 **/
+/** Recipe 타입 정의 * */
 
 // Recipe Content Type의 필드 정의
 export interface RecipeFields {
@@ -101,18 +101,19 @@ export interface RecipeFields {
     };
   }; // 비디오 파일 (Media - Video, 선택)
   youTubeUrl?: string; // YouTube URL (Short text, 선택)
+  steps?: RecipeStep[]; // 단계별 조리 과정 (선택적)
 }
 
 // Recipe Content Type의 스켈레톤 정의
 export interface RecipeSkeleton extends EntrySkeletonType<RecipeFields> {
   fields: RecipeFields;
-  contentTypeId: "recipe";
+  contentTypeId: 'recipe';
 }
 
 // Recipe Entry 타입 정의
 export type Recipe = Entry<RecipeSkeleton>;
 
-/** Gallery 타입 정의 **/
+/** Gallery 타입 정의 * */
 
 // Gallery Content Type의 필드 정의
 export interface GalleryFields {
@@ -131,33 +132,29 @@ export interface GalleryFields {
 // Gallery Content Type의 스켈레톤 정의
 export interface GallerySkeleton extends EntrySkeletonType<GalleryFields> {
   fields: GalleryFields;
-  contentTypeId: "gallery";
+  contentTypeId: 'gallery';
 }
 
 // Gallery Entry 타입 정의
 export type Gallery = Entry<GallerySkeleton>;
 
-/** 아래는 추가하려는 코드 **/
+/** 아래는 추가하려는 코드 * */
 
 export interface RecipeStep {
   stepNumber: number;
   description: Document;
-  image?: Asset[];
+  image?: {
+    fields: {
+      file: {
+        url: string;
+      };
+    };
+  }[]; // 이미지 배열으로 수정 (Contentful Asset 형식)
   timerDuration?: number; // 타이머 시간 (초 단위)
 }
 
-export interface RecipeEntry {
-  fields: {
-    titel: string;
-    description: Document;
-    image?: any[];
-    category?: string;
-    preparationTime?: number;
-    servings?: number;
-    ingredients: RecipeIngredient[];
-    instructions?: Document; // 조리과정 Rich Text Document
+export interface RecipeEntry extends Entry<RecipeSkeleton> {
+  fields: RecipeFields & {
     steps?: RecipeStep[]; // 단계별 조리 과정 (선택적)
-    videoFile?: any;
-    youTubeUrl?: string;
   };
 }

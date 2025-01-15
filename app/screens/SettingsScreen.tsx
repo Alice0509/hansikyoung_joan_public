@@ -1,6 +1,6 @@
 // app/screens/SettingsScreen.tsx
 
-import React from "react";
+import React from 'react';
 import {
   View,
   TouchableOpacity,
@@ -8,14 +8,14 @@ import {
   Linking,
   ScrollView,
   Alert,
-} from "react-native";
-import { useTranslation } from "react-i18next";
-import { useLanguage } from "../contexts/LanguageContext";
-import { useTheme } from "../contexts/ThemeContext";
-import { useFontSize } from "../contexts/FontSizeContext";
-import Ionicons from "@expo/vector-icons/Ionicons"; // 아이콘 사용
-import CustomText from "../components/CustomText";
-import Constants from "expo-constants"; // 앱 버전 정보 가져오기
+} from 'react-native';
+import { useTranslation } from 'react-i18next';
+import Ionicons from '@expo/vector-icons/Ionicons'; // 아이콘 사용
+import Constants from 'expo-constants'; // 앱 버전 정보 가져오기
+import { useLanguage } from '../contexts/LanguageContext';
+import { useTheme } from '../contexts/ThemeContext';
+import { useFontSize } from '../contexts/FontSizeContext';
+import CustomText from '../components/CustomText';
 
 const SettingsScreen: React.FC = () => {
   const { t } = useTranslation();
@@ -24,7 +24,7 @@ const SettingsScreen: React.FC = () => {
   const { fontSize, setFontSize } = useFontSize();
 
   // 웹사이트 주소
-  const websiteURL = "https://www.leckere-koreanische-rezepte.de/";
+  const websiteURL = 'https://www.leckere-koreanische-rezepte.de/';
 
   const changeLanguage = async (lang: string) => {
     await setLanguage(lang);
@@ -40,24 +40,24 @@ const SettingsScreen: React.FC = () => {
 
   const openWebsite = () => {
     Linking.openURL(websiteURL).catch((err) =>
-      console.error("Failed to open URL:", err),
+      console.error('Failed to open URL:', err),
     );
   };
 
   const sendFeedback = () => {
     Linking.openURL(
-      "mailto:joan.korean.rezepte@gmail.com?subject=Feedback&body=Your feedback here",
-    ).catch((err) => console.error("Failed to send feedback:", err));
+      'mailto:joan.korean.rezepte@gmail.com?subject=Feedback&body=Your feedback here',
+    ).catch((err) => console.error('Failed to send feedback:', err));
   };
 
   const openPrivacyPolicy = () => {
     Linking.openURL(
-      "https://www.leckere-koreanische-rezepte.de/privacy-policy",
-    ).catch((err) => console.error("Failed to open privacy policy:", err));
+      'https://www.leckere-koreanische-rezepte.de/privacy-policy',
+    ).catch((err) => console.error('Failed to open privacy policy:', err));
   };
 
   // 앱 버전 정보 가져오기
-  const appVersion = Constants.manifest?.version || "1.0.0";
+  const appVersion = Constants.manifest?.version || '1.0.0';
 
   // 현재 테마와 글꼴 크기를 기반으로 동적으로 스타일 생성
   const styles = getStyles(colors, fontSize);
@@ -65,32 +65,32 @@ const SettingsScreen: React.FC = () => {
   return (
     <ScrollView style={styles.scrollContainer}>
       <View style={styles.container}>
-        <CustomText style={styles.title}>{t("settings")}</CustomText>
+        <CustomText style={styles.title}>{t('settings')}</CustomText>
 
         {/* 언어 설정 섹션 */}
         <View style={styles.section}>
           <CustomText style={styles.sectionTitle}>
-            <Ionicons name="language-outline" size={20} color={colors.text} />{" "}
-            {t("language")}
+            <Ionicons name="language-outline" size={20} color={colors.text} />{' '}
+            {t('language')}
           </CustomText>
           <View style={styles.buttonContainer}>
             <TouchableOpacity
               style={[
                 styles.button,
-                language === "en" ? styles.activeButton : null,
+                language === 'en' ? styles.activeButton : null,
               ]}
-              onPress={() => changeLanguage("en")}
+              onPress={() => changeLanguage('en')}
             >
-              <CustomText style={styles.buttonText}>{t("english")}</CustomText>
+              <CustomText style={styles.buttonText}>{t('english')}</CustomText>
             </TouchableOpacity>
             <TouchableOpacity
               style={[
                 styles.button,
-                language === "de" ? styles.activeButton : null,
+                language === 'de' ? styles.activeButton : null,
               ]}
-              onPress={() => changeLanguage("de")}
+              onPress={() => changeLanguage('de')}
             >
-              <CustomText style={styles.buttonText}>{t("german")}</CustomText>
+              <CustomText style={styles.buttonText}>{t('german')}</CustomText>
             </TouchableOpacity>
           </View>
         </View>
@@ -102,12 +102,12 @@ const SettingsScreen: React.FC = () => {
               name="color-palette-outline"
               size={20}
               color={colors.text}
-            />{" "}
-            {t("theme")}
+            />{' '}
+            {t('theme')}
           </CustomText>
           <TouchableOpacity style={styles.button} onPress={toggleTheme}>
             <CustomText style={styles.buttonText}>
-              {theme === "light" ? t("dark_mode") : t("light_mode")}
+              {theme === 'light' ? t('dark_mode') : t('light_mode')}
             </CustomText>
           </TouchableOpacity>
         </View>
@@ -115,8 +115,8 @@ const SettingsScreen: React.FC = () => {
         {/* 글꼴 크기 조절 섹션 */}
         <View style={styles.section}>
           <CustomText style={styles.sectionTitle}>
-            <Ionicons name="text-outline" size={20} color={colors.text} />{" "}
-            {t("font_size")}
+            <Ionicons name="text-outline" size={20} color={colors.text} />{' '}
+            {t('font_size')}
           </CustomText>
           <View style={styles.fontSizeContainer}>
             <TouchableOpacity
@@ -142,12 +142,12 @@ const SettingsScreen: React.FC = () => {
               name="chatbubble-ellipses-outline"
               size={20}
               color={colors.text}
-            />{" "}
-            {t("feedback")}
+            />{' '}
+            {t('feedback')}
           </CustomText>
           <TouchableOpacity style={styles.button} onPress={sendFeedback}>
             <CustomText style={styles.buttonText}>
-              {t("send_feedback")}
+              {t('send_feedback')}
             </CustomText>
           </TouchableOpacity>
         </View>
@@ -159,8 +159,8 @@ const SettingsScreen: React.FC = () => {
               name="lock-closed-outline"
               size={20}
               color={colors.text}
-            />{" "}
-            {t("privacy_policy")}
+            />{' '}
+            {t('privacy_policy')}
           </CustomText>
           <TouchableOpacity style={styles.button} onPress={openPrivacyPolicy}>
             <CustomText style={styles.buttonText}>
@@ -176,8 +176,8 @@ const SettingsScreen: React.FC = () => {
               name="information-circle-outline"
               size={20}
               color={colors.text}
-            />{" "}
-            {t("app_info")}
+            />{' '}
+            {t('app_info')}
           </CustomText>
           <TouchableOpacity style={styles.button} onPress={openWebsite}>
             <CustomText style={styles.buttonText}>
@@ -186,14 +186,14 @@ const SettingsScreen: React.FC = () => {
           </TouchableOpacity>
           {/* 앱 버전 정보 추가 */}
           <CustomText style={styles.appVersion}>
-            {t("app_version")}: {appVersion}
+            {t('app_version')}: {appVersion}
           </CustomText>
         </View>
 
         {/* 푸터 섹션 */}
         <View style={styles.footer}>
           <CustomText style={styles.footerText}>
-            © 2024 Hansik Young Recipes.{" "}
+            © 2024 Hansik Young Recipes.{' '}
             <TouchableOpacity onPress={openImpressum}>
               <CustomText style={styles.footerLink}>Impressum</CustomText>
             </TouchableOpacity>
@@ -206,9 +206,9 @@ const SettingsScreen: React.FC = () => {
 
 // Impressum 열기 함수
 const openImpressum = () => {
-  const impressumURL = "https://www.leckere-koreanische-rezepte.de/impressum";
+  const impressumURL = 'https://www.leckere-koreanische-rezepte.de/impressum';
   Linking.openURL(impressumURL).catch((err) =>
-    console.error("Failed to open Impressum URL:", err),
+    console.error('Failed to open Impressum URL:', err),
   );
 };
 
@@ -224,26 +224,26 @@ const getStyles = (colors: any, fontSize: number) =>
       padding: 20,
     },
     title: {
-      fontWeight: "bold",
+      fontWeight: 'bold',
       marginBottom: 20,
       color: colors.text,
       fontSize: fontSize + 4,
-      textAlign: "center",
+      textAlign: 'center',
     },
     section: {
       marginBottom: 30,
     },
     sectionTitle: {
-      flexDirection: "row",
-      alignItems: "center",
+      flexDirection: 'row',
+      alignItems: 'center',
       fontSize: fontSize + 2,
       color: colors.text,
       marginBottom: 10,
-      fontWeight: "600",
+      fontWeight: '600',
     },
     buttonContainer: {
-      flexDirection: "row",
-      justifyContent: "space-around",
+      flexDirection: 'row',
+      justifyContent: 'space-around',
     },
     button: {
       flex: 1,
@@ -252,20 +252,20 @@ const getStyles = (colors: any, fontSize: number) =>
       backgroundColor: colors.buttonBackground,
       borderRadius: 8,
       marginHorizontal: 5,
-      alignItems: "center",
+      alignItems: 'center',
     },
     activeButton: {
       backgroundColor: colors.activeButtonBackground,
     },
     buttonText: {
       color: colors.buttonText,
-      fontSize: fontSize,
-      fontWeight: "500",
+      fontSize,
+      fontWeight: '500',
     },
     fontSizeContainer: {
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "center",
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
       marginVertical: 10,
     },
     smallButton: {
@@ -275,7 +275,7 @@ const getStyles = (colors: any, fontSize: number) =>
       marginHorizontal: 20,
     },
     fontSizeButtonText: {
-      color: "#fff",
+      color: '#fff',
       fontSize: 20,
     },
     fontSizeText: {
@@ -286,24 +286,24 @@ const getStyles = (colors: any, fontSize: number) =>
       marginTop: 10,
       fontSize: 12,
       color: colors.secondary,
-      textAlign: "center",
+      textAlign: 'center',
     },
     footer: {
       marginTop: 20,
-      alignItems: "center",
+      alignItems: 'center',
       paddingVertical: 10,
       borderTopWidth: 1,
-      borderTopColor: "#ddd",
+      borderTopColor: '#ddd',
     },
     footerText: {
       fontSize: 12,
-      color: "#555",
+      color: '#555',
     },
     footerLink: {
       fontSize: 12,
-      color: "#555",
-      textDecorationLine: "none",
-      fontWeight: "bold",
+      color: '#555',
+      textDecorationLine: 'none',
+      fontWeight: 'bold',
     },
   });
 

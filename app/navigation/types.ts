@@ -14,6 +14,6 @@ export type TabParamList = {
   Home: undefined;
   RecipeList: undefined; // 탭 자체에서는 직접 접근하지 않도록 undefined로 설정
   Ingredients: undefined;
-  Favorites: undefined; //Tab Navigator 내에만 존재
+  Favorites: undefined; // Tab Navigator 내에만 존재
   Settings: undefined;
 };

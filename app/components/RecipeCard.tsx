@@ -1,6 +1,6 @@
 // app/components/RecipeCard.tsx
 
-import React from "react";
+import React from 'react';
 import {
   View,
   Text,
@@ -8,18 +8,18 @@ import {
   StyleSheet,
   TouchableOpacity,
   Platform,
-} from "react-native";
-import { useFavorites } from "../contexts/FavoritesContext";
-import { Recipe } from "../types/Recipe";
-import { getThumbnailFromEmbedUrl } from "../lib/getYouTubeThumbnail";
-import { Ionicons } from "@expo/vector-icons"; // Expo 벡터 아이콘 사용
-import { useNavigation } from "@react-navigation/native";
-import { StackNavigationProp } from "@react-navigation/stack";
-import { RootStackParamList } from "../navigation/types";
+} from 'react-native';
+import { Ionicons } from '@expo/vector-icons'; // Expo 벡터 아이콘 사용
+import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { useFavorites } from '../contexts/FavoritesContext';
+import { Recipe } from '../types/Recipe';
+import { getThumbnailFromEmbedUrl } from '../lib/getYouTubeThumbnail';
+import { RootStackParamList } from '../navigation/types';
 
 type RecipeCardNavigationProp = StackNavigationProp<
   RootStackParamList,
-  "RecipeDetail"
+  'RecipeDetail'
 >;
 
 interface RecipeCardProps {
@@ -64,13 +64,8 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
   // 카테고리 이름 가져오기 (모든 카테고리 표시)
   const categoryNames =
     recipe.fields?.categories && recipe.fields.categories.length > 0
-      ? recipe.fields.categories.map((cat) => cat.fields.name).join(", ")
+      ? recipe.fields.categories.map((cat) => cat.fields.name).join(', ')
       : null; // "No Category" 대신 null로 설정
-
-  // 콘솔 로그 추가 (디버깅용)
-  console.log("Recipe Fields:", recipe.fields);
-  console.log("Title:", recipe.fields?.titel);
-  console.log("Image URL:", imageUrl);
 
   return (
     <TouchableOpacity
@@ -79,8 +74,8 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
         fullWidth ? styles.fullWidthCard : styles.defaultCard,
       ]}
       onPress={onPress}
-      accessible={true}
-      accessibilityLabel={`Recipe: ${recipe.fields?.titel || "Untitled Recipe"}`}
+      accessible
+      accessibilityLabel={`Recipe: ${recipe.fields?.titel || 'Untitled Recipe'}`}
     >
       {/* 이미지 렌더링 */}
       {imageUrl ? (
@@ -91,7 +86,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
         />
       ) : (
         <Image
-          source={require("../../assets/images/default.png")}
+          source={require('../../assets/images/default.png')}
           style={styles.image}
           resizeMode="cover"
         />
@@ -99,7 +94,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
       {/* 제목 및 카테고리 */}
       <View style={styles.content}>
         <Text style={styles.title}>
-          {recipe.fields?.titel || "Untitled Recipe"}
+          {recipe.fields?.titel || 'Untitled Recipe'}
         </Text>
         {showCategory && categoryNames && (
           <Text style={styles.category}>{categoryNames}</Text>
@@ -109,15 +104,15 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
       <TouchableOpacity
         style={styles.favoriteButton}
         onPress={handleFavoriteToggle}
-        accessible={true}
+        accessible
         accessibilityLabel={
-          favorite ? "Remove from favorites" : "Add to favorites"
+          favorite ? 'Remove from favorites' : 'Add to favorites'
         }
       >
         <Ionicons
-          name={favorite ? "heart" : "heart-outline"}
+          name={favorite ? 'heart' : 'heart-outline'}
           size={24}
-          color={favorite ? "red" : "gray"}
+          color={favorite ? 'red' : 'gray'}
         />
       </TouchableOpacity>
     </TouchableOpacity>
@@ -126,13 +121,13 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: "#fff",
+    backgroundColor: '#fff',
     borderRadius: 8,
-    overflow: "hidden",
+    overflow: 'hidden',
     // 그림자 스타일 플랫폼별로 적용
     ...Platform.select({
       ios: {
-        shadowColor: "#000",
+        shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.25,
         shadowRadius: 3.84,
@@ -141,10 +136,10 @@ const styles = StyleSheet.create({
         elevation: 5,
       },
       web: {
-        boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)", // 웹 전용 그림자
+        boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.1)', // 웹 전용 그림자
       },
     }),
-    position: "relative",
+    position: 'relative',
     marginBottom: 20, // 카드 간 간격 확보
   },
   defaultCard: {
@@ -152,11 +147,11 @@ const styles = StyleSheet.create({
     marginRight: 15, // 홈 스크린에서 사용할 오른쪽 마진
   },
   fullWidthCard: {
-    width: "100%", // 레시피 리스트에서 전체 너비 사용
+    width: '100%', // 레시피 리스트에서 전체 너비 사용
     marginRight: 0, // 레시피 리스트에서는 오른쪽 마진 제거
   },
   image: {
-    width: "100%",
+    width: '100%',
     height: 200, // 고정 높이 또는 비율에 따라 조정
   },
   content: {
@@ -164,21 +159,21 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 18,
-    fontWeight: "bold",
-    textAlign: "center",
-    color: "#000",
+    fontWeight: 'bold',
+    textAlign: 'center',
+    color: '#000',
   },
   category: {
     fontSize: 14,
-    color: "#666",
-    textAlign: "center",
+    color: '#666',
+    textAlign: 'center',
     marginTop: 5,
   },
   favoriteButton: {
-    position: "absolute",
+    position: 'absolute',
     top: 10,
     right: 10,
-    backgroundColor: "rgba(0,0,0,0.5)",
+    backgroundColor: 'rgba(0,0,0,0.5)',
     borderRadius: 20,
     padding: 5,
   },

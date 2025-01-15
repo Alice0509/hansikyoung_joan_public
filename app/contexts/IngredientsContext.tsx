@@ -6,8 +6,8 @@ import React, {
   ReactNode,
   useEffect,
   useCallback,
-} from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+} from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface IngredientsContextProps {
   checkedIngredients: boolean[];
@@ -25,7 +25,7 @@ interface IngredientsProviderProps {
   children: ReactNode;
 }
 
-const STORAGE_KEY_PREFIX = "@checkedIngredients_";
+const STORAGE_KEY_PREFIX = '@checkedIngredients_';
 
 export const IngredientsProvider: React.FC<IngredientsProviderProps> = ({
   children,
@@ -49,15 +49,13 @@ export const IngredientsProvider: React.FC<IngredientsProviderProps> = ({
           if (storedChecked !== null) {
             const parsedChecked = JSON.parse(storedChecked);
             setCheckedIngredients(parsedChecked);
-          } else {
-            if (ingredientsCount > 0) {
-              const initialChecked = new Array(ingredientsCount).fill(false);
-              setCheckedIngredients(initialChecked);
-            }
+          } else if (ingredientsCount > 0) {
+            const initialChecked = new Array(ingredientsCount).fill(false);
+            setCheckedIngredients(initialChecked);
           }
         } catch (error) {
           console.error(
-            "Failed to load checked ingredients from storage:",
+            'Failed to load checked ingredients from storage:',
             error,
           );
         }
@@ -78,7 +76,7 @@ export const IngredientsProvider: React.FC<IngredientsProviderProps> = ({
           );
         } catch (error) {
           console.error(
-            "Failed to save checked ingredients to storage:",
+            'Failed to save checked ingredients to storage:',
             error,
           );
         }
@@ -89,11 +87,9 @@ export const IngredientsProvider: React.FC<IngredientsProviderProps> = ({
   }, [checkedIngredients, currentRecipeId]);
 
   const toggleCheck = useCallback((index: number) => {
-    console.log(`Toggling check for index: ${index}`);
     setCheckedIngredients((prev) => {
       const newChecked = [...prev];
       newChecked[index] = !newChecked[index];
-      console.log(`New checkedIngredients: ${JSON.stringify(newChecked)}`);
       return newChecked;
     });
   }, []);

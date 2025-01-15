@@ -1,16 +1,16 @@
 // app/components/IngredientCard.tsx
 
-import React from "react";
-import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
-import { Entry } from "contentful"; // Contentful Entry 타입 임포트
-import { Ingredient } from "../types/Recipe"; // Ingredient 타입 임포트
-import { useNavigation } from "@react-navigation/native";
-import { StackNavigationProp } from "@react-navigation/stack";
-import { RootStackParamList } from "../navigation/types";
+import React from 'react';
+import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import { Entry } from 'contentful'; // Contentful Entry 타입 임포트
+import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { Ingredient } from '../types/Recipe'; // Ingredient 타입 임포트
+import { RootStackParamList } from '../navigation/types';
 
 type IngredientCardNavigationProp = StackNavigationProp<
   RootStackParamList,
-  "IngredientDetail" // "IngredientDetail"으로 변경
+  'IngredientDetail' // "IngredientDetail"으로 변경
 >;
 
 interface IngredientCardProps {
@@ -28,25 +28,17 @@ const IngredientCard: React.FC<IngredientCardProps> = ({ ingredient }) => {
 
   const imageUrl = `https:${bild.fields.file.url}`;
 
-  // 네비게이션 호출 전 파라미터 확인을 위한 로그 추가
-  console.log(
-    "Navigating to IngredientDetail with ID:",
-    ingredient.sys.id,
-    "and Locale:",
-    "en",
-  );
-
   return (
     <TouchableOpacity
       style={styles.card}
       onPress={() =>
-        navigation.navigate("IngredientDetail", {
+        navigation.navigate('IngredientDetail', {
           // "Ingredient"에서 "IngredientDetail"로 변경
           ingredientId: ingredient.sys.id,
-          locale: "en", // 필요한 locale을 전달
+          locale: 'en', // 필요한 locale을 전달
         })
       }
-      accessible={true}
+      accessible
       accessibilityLabel={`Ingredient: ${name}`}
     >
       {/* 이미지 렌더링 */}
@@ -65,18 +57,18 @@ const IngredientCard: React.FC<IngredientCardProps> = ({ ingredient }) => {
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: "#f9f9f9",
+    backgroundColor: '#f9f9f9',
     borderRadius: 8,
     marginBottom: 15,
-    overflow: "hidden",
-    shadowColor: "#000",
+    overflow: 'hidden',
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 3.84,
     elevation: 2,
   },
   image: {
-    width: "100%",
+    width: '100%',
     height: 150,
   },
   infoContainer: {
@@ -84,9 +76,9 @@ const styles = StyleSheet.create({
   },
   name: {
     fontSize: 20,
-    fontWeight: "bold",
-    color: "#000",
-    textAlign: "center",
+    fontWeight: 'bold',
+    color: '#000',
+    textAlign: 'center',
   },
 });
 

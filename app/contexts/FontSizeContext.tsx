@@ -1,6 +1,6 @@
 // app/contexts/FontSizeContext.tsx
 
-import React, { createContext, useState, useContext, ReactNode } from "react";
+import React, { createContext, useState, useContext, ReactNode } from 'react';
 
 interface FontSizeContextProps {
   fontSize: number;
@@ -26,7 +26,7 @@ export const FontSizeProvider: React.FC<{ children: ReactNode }> = ({
 export const useFontSize = (): FontSizeContextProps => {
   const context = useContext(FontSizeContext);
   if (!context) {
-    throw new Error("useFontSize must be used within a FontSizeProvider");
+    throw new Error('useFontSize must be used within a FontSizeProvider');
   }
   return context;
 };

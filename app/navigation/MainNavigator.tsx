@@ -1,16 +1,16 @@
 // app/navigation/MainNavigator.tsx
 
-import React from "react";
-import { createStackNavigator } from "@react-navigation/stack";
+import React from 'react';
+import { createStackNavigator } from '@react-navigation/stack';
 
-import SplashScreen from "../screens/SplashScreen";
-import MainTabNavigator from "./MainTabNavigator";
-import RecipeDetailScreen from "../screens/RecipeDetailScreen";
-import IngredientDetailScreen from "../screens/IngredientDetailScreen";
-import LocalNotificationTestScreen from "../screens/LocalNotificationTestScreen";
+import SplashScreen from '../screens/SplashScreen';
+import MainTabNavigator from './MainTabNavigator';
+import RecipeDetailScreen from '../screens/RecipeDetailScreen';
+import IngredientDetailScreen from '../screens/IngredientDetailScreen';
+import LocalNotificationTestScreen from '../screens/LocalNotificationTestScreen';
 // import FavoritesScreen from "../screens/FavoritesScreen"; // Stack Navigator에서 제거
 
-import { RootStackParamList } from "./types";
+import { RootStackParamList } from './types';
 
 const Stack = createStackNavigator<RootStackParamList>();
 
@@ -33,19 +33,19 @@ const MainNavigator: React.FC = () => {
       <Stack.Screen
         name="RecipeDetail"
         component={RecipeDetailScreen}
-        options={{ title: "Recipe Details" }}
+        options={{ title: 'Recipe Details' }}
       />
       {/* IngredientDetailScreen 등록 */}
       <Stack.Screen
         name="IngredientDetail"
         component={IngredientDetailScreen}
-        options={{ title: "Ingredient Details" }}
+        options={{ title: 'Ingredient Details' }}
       />
       {/* LocalNotificationTestScreen 추가 */}
       <Stack.Screen
         name="LocalNotificationTest"
         component={LocalNotificationTestScreen}
-        options={{ title: "Local Notification Test" }}
+        options={{ title: 'Local Notification Test' }}
       />
       {/* FavoritesScreen 제거 */}
     </Stack.Navigator>

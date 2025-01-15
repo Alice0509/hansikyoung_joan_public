@@ -6,8 +6,8 @@ import React, {
   useState,
   useEffect,
   ReactNode,
-} from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+} from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface FavoritesContextProps {
   favorites: string[]; // 레시피 ID 문자열 목록
@@ -32,12 +32,12 @@ export const FavoritesProvider: React.FC<{ children: ReactNode }> = ({
     // 앱 시작 시 AsyncStorage에서 즐겨찾기 불러오기
     const loadFavorites = async () => {
       try {
-        const storedFavorites = await AsyncStorage.getItem("@favorites");
+        const storedFavorites = await AsyncStorage.getItem('@favorites');
         if (storedFavorites) {
           setFavorites(JSON.parse(storedFavorites));
         }
       } catch (e) {
-        console.error("Failed to load favorites:", e);
+        console.error('Failed to load favorites:', e);
       }
     };
     loadFavorites();
@@ -47,9 +47,9 @@ export const FavoritesProvider: React.FC<{ children: ReactNode }> = ({
     // 즐겨찾기 변경 시 AsyncStorage에 저장
     const saveFavorites = async () => {
       try {
-        await AsyncStorage.setItem("@favorites", JSON.stringify(favorites));
+        await AsyncStorage.setItem('@favorites', JSON.stringify(favorites));
       } catch (e) {
-        console.error("Failed to save favorites:", e);
+        console.error('Failed to save favorites:', e);
       }
     };
     saveFavorites();

@@ -10,7 +10,6 @@
     "strict": true,
     "forceConsistentCasingInFileNames": true,
     "noEmit": true,
-    // "types": ["node"], // 필요하지 않다면 제거
     "jsx": "react",
     "moduleResolution": "node",
     "resolveJsonModule": true,

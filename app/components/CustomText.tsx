@@ -1,10 +1,10 @@
 // app/components/CustomText.tsx
 
-import React from "react";
-import { Text, TextProps, StyleSheet } from "react-native";
+import React from 'react';
+import { Text, TextProps, StyleSheet } from 'react-native';
 
 interface CustomTextProps extends TextProps {
-  children: React.ReactNode;
+  children: string; // React.ReactNode에서 string으로 변경
 }
 
 const CustomText: React.FC<CustomTextProps> = ({

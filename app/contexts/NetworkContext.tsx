@@ -1,7 +1,7 @@
-//app/contexts/NetworkContext.tsx
+// app/contexts/NetworkContext.tsx
 
-import React, { createContext, useContext, useState, useEffect } from "react";
-import NetInfo from "@react-native-community/netinfo";
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import NetInfo from '@react-native-community/netinfo';
 
 type NetworkContextType = {
   isConnected: boolean;
@@ -29,7 +29,7 @@ export const NetworkProvider: React.FC = ({ children }) => {
 export const useNetwork = () => {
   const context = useContext(NetworkContext);
   if (!context) {
-    throw new Error("useNetwork must be used within a NetworkProvider");
+    throw new Error('useNetwork must be used within a NetworkProvider');
   }
   return context;
 };

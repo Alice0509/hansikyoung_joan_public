@@ -1,24 +1,24 @@
 // app/screens/IngredientListScreen.tsx
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from 'react';
 import {
   View,
   FlatList,
   StyleSheet,
   ActivityIndicator,
   Text,
-} from "react-native";
-import { useNavigation } from "@react-navigation/native";
-import { StackNavigationProp } from "@react-navigation/stack";
-import { RootStackParamList } from "../navigation/types";
-import { Entry } from "contentful";
-import { Ingredient } from "../types/Recipe";
-import IngredientCard from "../components/IngredientCard"; // IngredientCard 임포트
-import { getAllIngredients } from "../lib/contentful"; // getAllIngredients 임포트
+} from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { Entry } from 'contentful';
+import { RootStackParamList } from '../navigation/types';
+import { Ingredient } from '../types/Recipe';
+import IngredientCard from '../components/IngredientCard'; // IngredientCard 임포트
+import { getAllIngredients } from '../lib/contentful'; // getAllIngredients 임포트
 
 type IngredientListScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
-  "Ingredients"
+  'Ingredients'
 >;
 
 const IngredientListScreen: React.FC = () => {
@@ -30,17 +30,16 @@ const IngredientListScreen: React.FC = () => {
   useEffect(() => {
     const fetchIngredients = async () => {
       try {
-        const data = await getAllIngredients("en"); // 필요한 locale로 설정
+        const data = await getAllIngredients('en'); // 필요한 locale로 설정
         // bild 필드가 있는 항목만 필터링
         const filteredData = data.filter(
           (ingredient) =>
             ingredient.fields.bild && ingredient.fields.bild.fields.file.url,
         );
         setIngredients(filteredData);
-        console.log("Fetched Ingredients:", filteredData);
       } catch (error) {
-        console.error("Error fetching ingredients:", error);
-        setError("Failed to load ingredients.");
+        console.error('Error fetching ingredients:', error);
+        setError('Failed to load ingredients.');
       } finally {
         setLoading(false);
       }
@@ -96,31 +95,31 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: "#fff",
+    backgroundColor: '#fff',
   },
   loadingContainer: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   centeredContainer: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
     paddingHorizontal: 20,
   },
   listContainer: {
     paddingBottom: 20,
   },
   errorText: {
-    textAlign: "center",
+    textAlign: 'center',
     fontSize: 16,
-    color: "red",
+    color: 'red',
   },
   noDataText: {
-    textAlign: "center",
+    textAlign: 'center',
     fontSize: 16,
-    color: "#000",
+    color: '#000',
   },
 });
 

@@ -1,8 +1,8 @@
 // app/components/ErrorBoundary.tsx
 
-import React, { Component, ReactNode } from "react";
-import { View, Text, StyleSheet } from "react-native";
-import { safeStringify } from "../utils/safeStringify"; // safeStringify 임포트
+import React, { Component, ReactNode } from 'react';
+import { View, Text, StyleSheet } from 'react-native';
+import { safeStringify } from '../utils/safeStringify'; // safeStringify 임포트
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -25,24 +25,24 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   }
 
   componentDidCatch(error: Error, info: any) {
-    console.error("ErrorBoundary caught an error:", error, info);
+    console.error('ErrorBoundary caught an error:', error, info);
     this.setState({ info });
   }
 
   render() {
     if (this.state.hasError && this.state.error) {
-      let errorMessage = this.state.error.toString();
-      let errorDetails = "";
+      const errorMessage = this.state.error.toString();
+      let errorDetails = '';
 
       if (this.state.info?.componentStack) {
         try {
           errorDetails = safeStringify(this.state.info.componentStack);
         } catch (error) {
           console.error(
-            "ErrorBoundary: Failed to stringify componentStack.",
+            'ErrorBoundary: Failed to stringify componentStack.',
             error,
           );
-          errorDetails = "Unable to display error details.";
+          errorDetails = 'Unable to display error details.';
         }
       }
 
@@ -62,23 +62,23 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
     padding: 20,
   },
   errorText: {
     fontSize: 18,
-    fontWeight: "bold",
-    color: "#FF3B30",
+    fontWeight: 'bold',
+    color: '#FF3B30',
     marginBottom: 10,
   },
   errorMessage: {
     fontSize: 16,
-    color: "#555",
+    color: '#555',
   },
   errorDetails: {
     fontSize: 14,
-    color: "#999",
+    color: '#999',
     marginTop: 10,
   },
 });
