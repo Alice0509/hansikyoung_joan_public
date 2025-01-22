@@ -39,4 +39,4 @@ yarn-error.*
 /ios
 HansikYoungRecipes/
 
-.env
+.env.env
