@@ -10,26 +10,27 @@ import {
   DefaultTheme,
 } from '@react-navigation/native';
 import { I18nextProvider } from 'react-i18next';
-import MainNavigator from './app/navigation/MainNavigator';
+import { LanguageProvider } from './app/contexts/LanguageContext';
+import { ThemeProvider, useTheme } from './app/contexts/ThemeContext';
+import { FontSizeProvider } from './app/contexts/FontSizeContext';
 import { FavoritesProvider } from './app/contexts/FavoritesContext';
 import { SearchProvider } from './app/contexts/SearchContext';
-import { LanguageProvider } from './app/contexts/LanguageContext';
-import { ThemeProvider, useTheme } from './app/contexts/ThemeContext'; // useTheme import
-import { FontSizeProvider } from './app/contexts/FontSizeContext';
 import { IngredientsProvider } from './app/contexts/IngredientsContext';
 import { LocaleProvider } from './app/contexts/LocaleProvider';
+import { ShoppingListProvider } from './app/contexts/ShoppingListContext';
 import ErrorBoundary from './app/components/ErrorBoundary';
 import i18n from './app/i18n';
+import RootStackNavigator from './app/navigation/RootStackNavigator';
 
 const queryClient = new QueryClient();
 
 const AppContent: React.FC = () => {
-  const { theme } = useTheme(); // useTheme 사용
+  const { theme } = useTheme();
 
   return (
     <QueryClientProvider client={queryClient}>
       <NavigationContainer theme={theme === 'dark' ? DarkTheme : DefaultTheme}>
-        <MainNavigator />
+        <RootStackNavigator />
       </NavigationContainer>
     </QueryClientProvider>
   );
@@ -45,13 +46,15 @@ const App: React.FC = () => {
               <FavoritesProvider>
                 <SearchProvider>
                   <IngredientsProvider>
-                    <LocaleProvider>
-                      <ErrorBoundary>
-                        <SafeAreaView style={styles.container}>
-                          <AppContent />
-                        </SafeAreaView>
-                      </ErrorBoundary>
-                    </LocaleProvider>
+                    <ShoppingListProvider>
+                      <LocaleProvider>
+                        <ErrorBoundary>
+                          <SafeAreaView style={styles.container}>
+                            <AppContent />
+                          </SafeAreaView>
+                        </ErrorBoundary>
+                      </LocaleProvider>
+                    </ShoppingListProvider>
                   </IngredientsProvider>
                 </SearchProvider>
               </FavoritesProvider>

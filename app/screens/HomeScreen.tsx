@@ -166,12 +166,8 @@ const HomeScreen: React.FC = () => {
       </View>
     );
   }
-
   return (
     <View style={styles.container}>
-      {/* 검색 바 추가 */}
-      <SearchBar />
-
       <ScrollView>
         {filteredCategories.map(({ category, recipes }) => (
           <View key={category.sys.id} style={styles.categorySection}>

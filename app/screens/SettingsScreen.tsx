@@ -9,6 +9,7 @@ import {
   ScrollView,
   Alert,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTranslation } from 'react-i18next';
 import Ionicons from '@expo/vector-icons/Ionicons'; // 아이콘 사용
 import Constants from 'expo-constants'; // 앱 버전 정보 가져오기
@@ -16,12 +17,16 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { useFontSize } from '../contexts/FontSizeContext';
 import CustomText from '../components/CustomText';
+import { useShoppingList } from '../contexts/ShoppingListContext';
+import { useFavorites } from '../contexts/FavoritesContext';
 
 const SettingsScreen: React.FC = () => {
   const { t } = useTranslation();
   const { language, setLanguage } = useLanguage();
   const { theme, toggleTheme, colors } = useTheme();
   const { fontSize, setFontSize } = useFontSize();
+  const { clearList } = useShoppingList();
+  const { clearFavorites } = useFavorites();
 
   // 웹사이트 주소
   const websiteURL = 'https://www.leckere-koreanische-rezepte.de/';
@@ -54,6 +59,38 @@ const SettingsScreen: React.FC = () => {
     Linking.openURL(
       'https://www.leckere-koreanische-rezepte.de/privacy-policy',
     ).catch((err) => console.error('Failed to open privacy policy:', err));
+  };
+  const resetData = async () => {
+    try {
+      await AsyncStorage.clear();
+      clearList();
+      clearFavorites();
+      Alert.alert(t('Reset Successful'), t('All local data has been cleared.'));
+    } catch (error) {
+      console.error('Error resetting data:', error);
+      Alert.alert(
+        t('Reset Failed'),
+        t('There was an error clearing local data.'),
+      );
+    }
+  };
+  const confirmReset = () => {
+    Alert.alert(
+      t('Confirm Reset'), // 제목
+      t('Are you sure you want to reset all local data?'), // 메시지
+      [
+        {
+          text: t('Cancel'),
+          style: 'cancel',
+        },
+        {
+          text: t('OK'),
+          onPress: resetData,
+          style: 'destructive', // iOS에서 붉은색 버튼 스타일
+        },
+      ],
+      { cancelable: true },
+    );
   };
 
   // 앱 버전 정보 가져오기
@@ -133,6 +170,14 @@ const SettingsScreen: React.FC = () => {
               <Ionicons name="add-outline" size={20} color="#fff" />
             </TouchableOpacity>
           </View>
+        </View>
+
+        {/* 데이터 초기화 섹션 추가 */}
+        <View style={styles.section}>
+          <CustomText style={styles.sectionTitle}>{t('data_reset')}</CustomText>
+          <TouchableOpacity style={styles.button} onPress={confirmReset}>
+            <CustomText style={styles.buttonText}>{t('reset_data')}</CustomText>
+          </TouchableOpacity>
         </View>
 
         {/* 피드백 섹션 */}

@@ -1,5 +1,3 @@
-// app/screens/RecipeDetailScreen.tsx
-
 import React, { useState, useEffect } from 'react';
 import {
   View,
@@ -7,9 +5,7 @@ import {
   ScrollView,
   ActivityIndicator,
   StyleSheet,
-  Linking,
   TouchableOpacity,
-  Dimensions,
   Alert,
 } from 'react-native';
 import { RouteProp } from '@react-navigation/native';
@@ -19,7 +15,7 @@ import { useKeepAwake } from 'expo-keep-awake';
 import { useTranslation } from 'react-i18next';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { Snackbar } from 'react-native-paper';
-import * as Speech from 'expo-speech'; // (여전히 사용하신다면)
+import * as Speech from 'expo-speech';
 import { getRecipeById } from '../lib/contentful';
 import RichTextRenderer from '../components/RichTextRenderer';
 import {
@@ -29,7 +25,6 @@ import {
   RecipeStep,
 } from '../types/Recipe';
 import { RootStackParamList } from '../navigation/types';
-import { getThumbnailFromEmbedUrl } from '../lib/getYouTubeThumbnail';
 import { useLanguage } from '../contexts/LanguageContext';
 import CustomText from '../components/CustomText';
 import { useTheme } from '../contexts/ThemeContext';
@@ -38,10 +33,10 @@ import StepByStepGuide from '../components/StepByStepGuide';
 import IngredientsChecklist from '../components/IngredientsChecklist';
 import { normalizeRichText } from '../utils/normalizeRichText';
 import AccordionSection from '../components/AccordionSection';
-
-// ★ 추가: FavoritesContext (즐겨찾기)
 import { useFavorites } from '../contexts/FavoritesContext';
+import { useShoppingList } from '../contexts/ShoppingListContext'; // 쇼핑 리스트 컨텍스트 임포트
 
+// 타입 정의
 type RecipeScreenRouteProp = RouteProp<RootStackParamList, 'RecipeDetail'>;
 type RecipeScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
@@ -258,6 +253,25 @@ const RecipeDetailScreen: React.FC<RecipeScreenProps> = ({
     }
   };
 
+  // '모두 해제' 기능
+  const { removeIngredient } = useShoppingList();
+  const handleUncheckAll = async () => {
+    if (recipe?.fields?.ingredients) {
+      const newChecked = new Array(recipe.fields.ingredients.length).fill(
+        false,
+      );
+      setCheckedIngredients(newChecked);
+      await AsyncStorage.setItem(
+        `checkedIngredients_${recipeId}`,
+        JSON.stringify(newChecked),
+      );
+
+      recipe.fields.ingredients.forEach((ri: RecipeIngredient) => {
+        removeIngredient(ri.fields.ingredient.sys.id);
+      });
+    }
+  };
+
   // TTS (expo-speech) 예시
   const handleReadAloud = (text: string) => {
     Speech.stop();
@@ -369,6 +383,16 @@ const RecipeDetailScreen: React.FC<RecipeScreenProps> = ({
         keyboardShouldPersistTaps="handled"
         accessible
       >
+        {/* 재료 섹션 전에 '모두 해제' 버튼 추가 */}
+        {/* <TouchableOpacity */}
+        {/* style={styles.uncheckAllButton} */}
+        {/* onPress={handleUncheckAll} */}
+        {/* > */}
+        {/* <CustomText style={{ color: colors.buttonText, fontSize }}> */}
+        {/* {t('uncheckAll')} */}
+        {/* </CustomText> */}
+        {/* </TouchableOpacity> */}
+
         {/* 레시피 메인 이미지 */}
         <View style={styles.imageContainer}>
           <Image

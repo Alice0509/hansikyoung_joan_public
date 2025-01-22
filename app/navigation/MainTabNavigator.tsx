@@ -3,6 +3,8 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { DrawerToggleButton } from '@react-navigation/drawer'; // 추가
+import { TouchableOpacity } from 'react-native';
 
 import HomeScreen from '../screens/HomeScreen';
 import RecipeListScreen from '../screens/RecipeListScreen';
@@ -19,6 +21,7 @@ const MainTabNavigator: React.FC = () => {
     <Tab.Navigator
       initialRouteName="Home"
       screenOptions={({ route }) => ({
+        headerShown: false, // headerLeft 제거
         tabBarIcon: ({ focused, color, size }) => {
           let iconName = '';
 
@@ -46,7 +49,6 @@ const MainTabNavigator: React.FC = () => {
         },
         tabBarActiveTintColor: '#007AFF',
         tabBarInactiveTintColor: 'gray',
-        headerShown: false,
       })}
     >
       <Tab.Screen name="Home" component={HomeScreen} />

@@ -116,5 +116,22 @@
   "currentStep": "Current Step",
   "readingSpeed": "Reading Speed",
   "imageForStep": "Image for step",
-  "opensImageForStep": "Opens image for step"
+  "opensImageForStep": "Opens image for step",
+  "uncheckAll": "Uncheck All",
+  "ShoppingList": "Shopping List",
+  "Shopping List": "Shopping List",
+  "Settings": "Settings",
+  "noItemsInShoppingList": "No items in the shopping list",
+  "data_reset": "Data Reset",
+  "reset_data": "Reset Data",
+  "Confirm Reset": "Confirm Reset",
+  "Are you sure you want to reset all local data?": "Are you sure you want to reset all local data?",
+  "Cancel": "Cancel",
+  "OK": "OK",
+  "Reset Successful": "Reset Successful",
+  "All local data has been cleared.": "All local data has been cleared.",
+  "Reset Failed": "Reset Failed",
+  "There was an error clearing local data.": "There was an error clearing local data.",
+  "noFavoritesYet": "No favorites yet.",
+  "dashboard": "Dashboard"
 }

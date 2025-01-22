@@ -5,6 +5,8 @@ import { View, StyleSheet, TouchableOpacity, Linking } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useTranslation } from 'react-i18next';
+import { useShoppingList } from '../contexts/ShoppingListContext'; // 쇼핑 리스트 컨텍스트 임포트
 import { RootStackParamList } from '../navigation/types';
 import CustomText from './CustomText';
 
@@ -41,18 +43,37 @@ const IngredientsChecklist: React.FC<IngredientsChecklistProps> = ({
   fontSize,
 }) => {
   const navigation = useNavigation<NavigationProp>();
+  const { t } = useTranslation();
+  const { addIngredient, removeIngredient } = useShoppingList();
 
   // checkedIngredients 배열이 ingredients 배열과 동일한 길이를 가지도록 조정
   const adjustedCheckedIngredients = ingredients.map(
     (_, index) => checkedIngredients[index] || false,
   );
 
+  // ingredient.id가 존재하면 IngredientDetail 화면으로, 없으면 웹링크로 이동하는 로직
   const handleIngredientPress = (ingredient: Ingredient) => {
     if (ingredient.id) {
       navigation.navigate('IngredientDetail', { ingredientId: ingredient.id });
     } else {
-      // Ingredient ID가 없을 경우, 다른 동작을 정의할 수 있습니다.
       Linking.openURL(`https://example.com/ingredients/${ingredient.name}`);
+    }
+  };
+
+  // 체크박스를 토글할 때 쇼핑 리스트에 추가 혹은 제거하는 로직
+  const handlePress = (
+    ingredient: Ingredient,
+    isChecked: boolean,
+    index: number,
+  ) => {
+    // UI 상의 체크 상태 변경
+    onToggleCheck(index);
+
+    // 쇼핑 리스트에 추가 혹은 제거
+    if (!isChecked) {
+      addIngredient(ingredient);
+    } else {
+      removeIngredient(ingredient.id);
     }
   };
 
@@ -72,7 +93,7 @@ const IngredientsChecklist: React.FC<IngredientsChecklistProps> = ({
             { fontSize: fontSize + 2, color: colors.text, flex: 3 },
           ]}
         >
-          Ingredient
+          {t('ingredient')}
         </CustomText>
         <CustomText
           style={[
@@ -85,9 +106,10 @@ const IngredientsChecklist: React.FC<IngredientsChecklistProps> = ({
             },
           ]}
         >
-          Quantity
+          {t('quantity')}
         </CustomText>
       </View>
+
       {/* 테이블 본문 */}
       {ingredients.map((ingredient, index) => (
         <TouchableOpacity
@@ -99,6 +121,7 @@ const IngredientsChecklist: React.FC<IngredientsChecklistProps> = ({
               : null,
           ]}
           onPress={() => {
+            // 이미지가 있는 경우에만 상세(또는 외부 링크)로 이동
             if (ingredient.image) {
               handleIngredientPress(ingredient);
             }
@@ -120,7 +143,13 @@ const IngredientsChecklist: React.FC<IngredientsChecklistProps> = ({
           {/* Ingredient Name Cell */}
           <View style={styles.tableCell}>
             <TouchableOpacity
-              onPress={() => onToggleCheck(index)}
+              onPress={() =>
+                handlePress(
+                  ingredient,
+                  adjustedCheckedIngredients[index],
+                  index,
+                )
+              }
               style={styles.checkboxContainer}
               accessible
               accessibilityRole="checkbox"
@@ -217,6 +246,7 @@ const styles = StyleSheet.create({
   linkIcon: {
     marginLeft: 5,
   },
+  // 아래 스타일들은 필요 시 활용 가능 (Markdown 스타일 등)
   orderedList: {
     marginVertical: 5,
     paddingLeft: 10,

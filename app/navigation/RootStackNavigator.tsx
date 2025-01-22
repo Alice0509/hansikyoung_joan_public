@@ -2,9 +2,9 @@
 
 import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
-import MainNavigator from './MainNavigator'; // 기존 MainNavigator import
-import RecipeDetailScreen from '../screens/RecipeDetailScreen'; // RecipeDetailScreen으로 가정
-
+import RootDrawerNavigator from './RootDrawerNavigator'; // <-- Drawer 임포트
+import IngredientDetailScreen from '../screens/IngredientDetailScreen';
+import RecipeDetailScreen from '../screens/RecipeDetailScreen';
 import { RootStackParamList } from './types';
 
 const RootStack = createStackNavigator<RootStackParamList>();
@@ -12,10 +12,18 @@ const RootStack = createStackNavigator<RootStackParamList>();
 const RootStackNavigator: React.FC = () => {
   return (
     <RootStack.Navigator>
+      {/* Drawer 최상위 라우트 */}
       <RootStack.Screen
-        name="Main"
-        component={MainNavigator}
+        name="Recipes"
+        component={RootDrawerNavigator}
         options={{ headerShown: false }}
+      />
+
+      {/* 디테일 스크린 등록 */}
+      <RootStack.Screen
+        name="IngredientDetail"
+        component={IngredientDetailScreen}
+        options={{ title: 'Ingredient Details' }}
       />
       <RootStack.Screen
         name="RecipeDetail"

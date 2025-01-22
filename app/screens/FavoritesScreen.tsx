@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useNavigation } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
 import { Entry } from 'contentful';
 import { RootStackParamList } from '../navigation/types';
 import { useFavorites } from '../contexts/FavoritesContext';
@@ -23,6 +24,7 @@ type FavoritesScreenNavigationProp = StackNavigationProp<
 >;
 
 const FavoritesScreen: React.FC = () => {
+  const { t } = useTranslation();
   const navigation = useNavigation<FavoritesScreenNavigationProp>();
   const { favorites } = useFavorites(); // 레시피 ID 문자열 목록
   const [favoriteRecipes, setFavoriteRecipes] = useState<Entry<Recipe>[]>([]);
@@ -93,7 +95,7 @@ const FavoritesScreen: React.FC = () => {
         />
       ) : (
         <View style={styles.emptyContainer}>
-          <Text style={styles.emptyText}>No favorites yet.</Text>
+          <Text style={styles.emptyText}>{t('noFavoritesYet')}</Text>
         </View>
       )}
     </View>
